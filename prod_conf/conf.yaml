@@ -1,0 +1,5 @@
+mode: 'prod'
+customer_prefix: 'p1pmx_prospect'
+default_prefix: 'p1pcat_prospect'
+prod_path: 's3://pmx-prod-uc-us-east-1-databricks-iq/thundr/prod/'
+qa_path:  's3://pmx-prod-uc-us-east-1-databricks-iq/thundr/qa/'

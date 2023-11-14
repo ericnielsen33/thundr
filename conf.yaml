@@ -1,0 +1,9 @@
+mode: 'dev'
+customer_prefix: 'p1pmx_prospect'
+default_prefix: 'p1pcat_prospect'
+master: 'local[*]'
+appname: 'Thundr'
+spark_conf:
+  spark.sql.adaptive.enabled: 'true'
+input_base_path: './thundr/resources/data/'
+output_base_path: './thundr/resources/output/'
