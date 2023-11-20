@@ -3,6 +3,7 @@ package com.thundr.util
 import zio._
 import zio.http._
 
+
 object HttpClient extends ZIOAppDefault {
   val url = "https://swapi.dev/api/people/1"
   // Construct headers

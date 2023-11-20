@@ -1,7 +1,8 @@
 package com.thundr.audience
 
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
+
 import java.sql.Timestamp
 
 case class Audience(
@@ -9,12 +10,12 @@ case class Audience(
                      seed: DataFrame,
                      name: String,
                      id: String = "individual_identity_key") {
-
+  private val defaultPrefix: String = "p1pmx_prospect"
   private val leftAlias: String = "left"
   private val rightAlias: String = "right"
-  private val audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session = session, prefix = "p1pmx_prospect")
-  private val audienceMetaProvider: AudienceMetaProvider = new AudienceMetaProvider(session = session, prefix = "p1pmx_prospect")
-  private val audienceEventProvider: AudienceEventProvider = new AudienceEventProvider(session = session, prefix = "p1pmx_prospect")
+  private val audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session = session, prefix = defaultPrefix)
+  private val audienceMetaProvider: AudienceMetaProvider = new AudienceMetaProvider(session = session, prefix = defaultPrefix)
+  private val audienceEventProvider: AudienceEventProvider = new AudienceEventProvider(session = session, prefix = defaultPrefix)
 
   def apply(other: Audience): Boolean = this.contains(other)
 
@@ -24,9 +25,7 @@ case class Audience(
         other.seed.as(rightAlias),
         col(s"${leftAlias}.${id}") === col(s"${rightAlias}.${other.id}"),
         "left")
-      .agg(
-        max(col(s"${rightAlias}.${other.id}").isNull)
-      )
+      .agg(max(col(s"${rightAlias}.${other.id}").isNull))
       .collectAsList()
       .get(0)
       .getBoolean(0)
@@ -38,9 +37,7 @@ case class Audience(
         other.seed.as(rightAlias),
         col(s"${leftAlias}.${id}") === col(s"${rightAlias}.${other.id}"),
         "left")
-      .agg(
-        max(col(s"${rightAlias}.${other.id}").isNotNull)
-      )
+      .agg(max(col(s"${rightAlias}.${other.id}").isNotNull))
       .collectAsList()
       .get(0)
       .getBoolean(0)
@@ -86,13 +83,19 @@ case class Audience(
               audienceMeta: AudienceMetaSchema,
               event:  AudienceEventSchema = AudienceEventSchema(this.name, new Timestamp(System.currentTimeMillis()), "CREATE")): Unit = {
     audienceCatalogueProvider.insertNewAudience(this)
-    audienceMetaProvider.append(audienceMeta)
-    audienceEventProvider.append(event)
+    persistMetadata(audienceMeta)
+    persistEvent(event)
   }
 
-  def activateToDiscovery(): Unit = ???
+  def persistXfer() = seed
+    .select(col(id).as("individual_identity_key"))
+    .write
+    .mode(SaveMode.Overwrite)
+    .format("parquet")
+    .saveAsTable(s"p1pmx_prospect.public_works.${name}")
+  def activateToDiscovery(dac_token: String): Unit = AudienceDacClient.postNewAudience(defaultPrefix,this, dac_token)
 
-  def persistMetadata(): Unit = ???
+  def persistMetadata(metaSchema: AudienceMetaSchema): Unit = audienceMetaProvider.append(metaSchema)
 
-  def persistEvent(): Unit = ???
+  def persistEvent(eventSchema: AudienceEventSchema): Unit = audienceEventProvider.append(eventSchema)
 }
