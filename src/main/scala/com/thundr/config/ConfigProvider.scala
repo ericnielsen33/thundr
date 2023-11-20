@@ -1,7 +1,7 @@
 package com.thundr.config
 
 import com.thundr.core.enums.CustomerPrefix
-import com.thundr.util.Yaml._
+import com.thundr.util.FileConfBuilder._
 
 trait ConfigProvider {
   lazy val configuration: scala.collection.mutable.Map[String, String] = readFile("conf.yaml")

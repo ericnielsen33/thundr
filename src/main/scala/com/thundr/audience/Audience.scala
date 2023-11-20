@@ -91,9 +91,12 @@ case class Audience(
     .select(col(id).as("individual_identity_key"))
     .write
     .mode(SaveMode.Overwrite)
+    .option("path", s"s3://pmx-prod-uc-us-east-1-databricks-iq/audience_xfer/${name}")
     .format("parquet")
-    .saveAsTable(s"p1pmx_prospect.public_works.${name}")
-  def activateToDiscovery(dac_token: String): Unit = AudienceDacClient.postNewAudience(defaultPrefix,this, dac_token)
+    .saveAsTable(s"p1pmx_prospect.audience_xfer.${name}")
+
+  persistEvent(AudienceEventSchema(this.name, new Timestamp(System.currentTimeMillis()), "PERSIT_XFER"))
+//  def activateToDiscovery(dac_token: String): Unit = AudienceDacClient.postNewAudience(defaultPrefix,this, dac_token)
 
   def persistMetadata(metaSchema: AudienceMetaSchema): Unit = audienceMetaProvider.append(metaSchema)
 

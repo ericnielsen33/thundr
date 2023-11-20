@@ -1,7 +1,7 @@
 package com.thundr.audience
 
 import io.delta.tables.DeltaTable
-import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 
 class AudienceCatalogueProvider(val session: SparkSession, val prefix: String)
@@ -69,5 +69,13 @@ class AudienceCatalogueProvider(val session: SparkSession, val prefix: String)
           "end_date" -> s"${source_alias}.null_end_date"
         ))
     merged.execute()
+  }
+
+  def read: DataFrame = {
+    session.read.table(uri)
+  }
+
+  def readAudinece(audience: Audience): DataFrame = {
+    session.read.table(uri).filter(col("audience").equalTo(lit(audience.name)))
   }
 }

@@ -1,7 +1,7 @@
 package com.thundr.config
 
 import org.apache.spark.sql.SparkSession
-import com.thundr.util.Yaml.readFile
+import com.thundr.util.FileConfBuilder.readFile
 
 trait SessionProvider {
   private val configuration: scala.collection.mutable.Map[String, String] = readFile("conf.yaml")
