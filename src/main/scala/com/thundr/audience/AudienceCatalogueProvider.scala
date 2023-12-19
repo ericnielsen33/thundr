@@ -1,16 +1,18 @@
 package com.thundr.audience
 
+import com.thundr.config.ConfigProvider
 import io.delta.tables.DeltaTable
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 
-class AudienceCatalogueProvider(val session: SparkSession, val prefix: String)
-  extends Serializable {
+class AudienceCatalogueProvider(val session: SparkSession)
+  extends Serializable
+  with ConfigProvider {
 
   private val target_alias: String = "target"
   private val source_alias: String = "source"
 
-  def uri: String = s"${prefix}.public_works.fact_audience_member"
+  def uri: String = s"${customer_prefix}.public_works.fact_audience_member"
   def create(): DeltaTable = {
     val table: DeltaTable = {
       DeltaTable.create()
@@ -41,6 +43,7 @@ class AudienceCatalogueProvider(val session: SparkSession, val prefix: String)
   def merge(audience: Audience): Unit = {
     val target = DeltaTable.forPath(session, uri)
     val source = audience.seed
+      .withColumnRenamed(audience.id, "individual_identity_key")
       .withColumn("audience", lit(audience.name))
       .withColumn("run_date", current_date())
       .withColumn(colName = "null_end_date", lit(null))

@@ -1,11 +1,14 @@
 package com.thundr.audience
 
+import com.thundr.config.ConfigProvider
 import io.delta.tables.DeltaTable
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
-class AudienceEventProvider(session: SparkSession, prefix: String) {
+class AudienceEventProvider(session: SparkSession)
+  extends Serializable
+  with ConfigProvider {
 
-  def uri: String = s"${prefix}.public_works.fact_audience_event"
+  def uri: String = s"${customer_prefix}.public_works.fact_audience_event"
 
   def append(event: AudienceEventSchema) = {
     import session.implicits._

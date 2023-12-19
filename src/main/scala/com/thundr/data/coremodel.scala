@@ -9,7 +9,7 @@ object coremodel
   with ConfigProvider {
   val domain: String = "coremodel"
   def dim_user(implicit spark: SparkSession) = {
-    val ds = DataSource("dim_user", domain, customerPrefix.value, spark)
+    val ds = DataSource("dim_user", domain, customer_prefix, spark)
     ds
   }
 }

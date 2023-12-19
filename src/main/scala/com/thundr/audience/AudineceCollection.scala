@@ -15,7 +15,7 @@ case class AudineceCollection[T](
     audience
   }
 
-  def createAll(): Unit = {
+  def generateAll(): Unit = {
     auience_spec.foreach(
       spec => {
         val audience = mkAudience(spec)
@@ -23,6 +23,9 @@ case class AudineceCollection[T](
         audience.create(meta)
       }
     )
+  }
+  def xferAll(): Unit = {
+
   }
 
 }

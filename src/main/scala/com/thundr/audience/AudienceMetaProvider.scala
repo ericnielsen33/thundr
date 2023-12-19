@@ -1,12 +1,14 @@
 package com.thundr.audience
 
+import com.thundr.config.ConfigProvider
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import io.delta.tables.DeltaTable
 
-class AudienceMetaProvider(val session: SparkSession, val prefix: String)
-  extends Serializable {
+class AudienceMetaProvider(val session: SparkSession)
+  extends Serializable
+  with ConfigProvider {
 
-  def uri: String = s"${prefix}.public_works.dim_audience"
+  def uri: String = s"${customer_prefix}.public_works.dim_audience"
 
   def create(): DeltaTable = {
     val table: DeltaTable = {

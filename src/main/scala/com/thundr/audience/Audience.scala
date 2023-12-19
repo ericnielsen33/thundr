@@ -2,23 +2,24 @@ package com.thundr.audience
 
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
-
 import java.sql.Timestamp
 
 case class Audience(
                      session: SparkSession,
                      seed: DataFrame,
                      name: String,
+                     dac_id: String = "",
                      id: String = "individual_identity_key") {
-  private val defaultPrefix: String = "p1pmx_prospect"
+
   private val leftAlias: String = "left"
   private val rightAlias: String = "right"
-  private val audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session = session, prefix = defaultPrefix)
-  private val audienceMetaProvider: AudienceMetaProvider = new AudienceMetaProvider(session = session, prefix = defaultPrefix)
-  private val audienceEventProvider: AudienceEventProvider = new AudienceEventProvider(session = session, prefix = defaultPrefix)
+  private val audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session = session)
+  private val audienceMetaProvider: AudienceMetaProvider = new AudienceMetaProvider(session = session)
+  private val audienceEventProvider: AudienceEventProvider = new AudienceEventProvider(session = session)
 
   def apply(other: Audience): Boolean = this.contains(other)
 
+  def readFromCatalogue(): DataFrame = audienceCatalogueProvider.readAudinece(this)
   def contains(other: Audience): Boolean = {
     this.seed.as(leftAlias)
       .join(
@@ -29,6 +30,10 @@ case class Audience(
       .collectAsList()
       .get(0)
       .getBoolean(0)
+  }
+
+  def audienceCount: Int = {
+    readFromCatalogue().count().toInt
   }
 
   def overlaps(other: Audience): Boolean = {
@@ -91,8 +96,9 @@ case class Audience(
     .select(col(id).as("individual_identity_key"))
     .write
     .mode(SaveMode.Overwrite)
-    .option("path", s"s3://pmx-prod-uc-us-east-1-databricks-iq/audience_xfer/${name}")
-    .format("parquet")
+    .format("csv")
+    .option("path", s"s3://pmx-prod-uc-us-east-1-databricks-iq/audience_xfer/${name}.csv")
+    .option("headers", "true")
     .saveAsTable(s"p1pmx_prospect.audience_xfer.${name}")
 
   persistEvent(AudienceEventSchema(this.name, new Timestamp(System.currentTimeMillis()), "PERSIT_XFER"))
@@ -101,4 +107,6 @@ case class Audience(
   def persistMetadata(metaSchema: AudienceMetaSchema): Unit = audienceMetaProvider.append(metaSchema)
 
   def persistEvent(eventSchema: AudienceEventSchema): Unit = audienceEventProvider.append(eventSchema)
+
+//  def pollStatus(dac_id: String) = AudienceDacClient.pollAudienceStatus(dac_d)
 }
