@@ -4,8 +4,7 @@ case class ArgParser(input: Array[String], val mapping: Map[String, String] = Ma
   def parse(args: Array[String]): ArgParser = {
     val argMapping = args
       .map {_.split("=")}
-      .map {
-        case Array(k, v) => k.toLowerCase().replace("--", "") -> v }
+      .map {case Array(k, v) => k.toLowerCase().replace("--", "") -> v}
       .toMap
     ArgParser(args, argMapping)
   }

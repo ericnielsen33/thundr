@@ -3,6 +3,7 @@ package com.thundr.audience
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 import java.sql.Timestamp
+import com.thundr.audience.DacClient
 
 case class Audience(
                      session: SparkSession,
@@ -101,12 +102,12 @@ case class Audience(
     .option("headers", "true")
     .saveAsTable(s"p1pmx_prospect.audience_xfer.${name}")
 
-  persistEvent(AudienceEventSchema(this.name, new Timestamp(System.currentTimeMillis()), "PERSIT_XFER"))
+  persistEvent(AudienceEventSchema(this.name, new Timestamp(System.currentTimeMillis()), "PERSIST_XFER"))
 //  def activateToDiscovery(dac_token: String): Unit = AudienceDacClient.postNewAudience(defaultPrefix,this, dac_token)
 
   def persistMetadata(metaSchema: AudienceMetaSchema): Unit = audienceMetaProvider.append(metaSchema)
 
   def persistEvent(eventSchema: AudienceEventSchema): Unit = audienceEventProvider.append(eventSchema)
 
-//  def pollStatus(dac_id: String) = AudienceDacClient.pollAudienceStatus(dac_d)
+  def pollStatus(): String = DacClient.pollAudienceStatus(this.dac_id)
 }

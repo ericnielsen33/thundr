@@ -9,7 +9,7 @@ case object TRANSFER_OK extends AudienceEvent
 case object TRANSFER_ERROR extends AudienceEvent
 case object API_POLL_EXISTS extends AudienceEvent
 case object API_POLL_ABSENT extends AudienceEvent
-case object REMOVE_XFER_TABLE extends AudienceEvent
+case object DROP_XFER_TABLE extends AudienceEvent
 case object DELETE extends AudienceEvent
 
 

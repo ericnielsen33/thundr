@@ -13,6 +13,7 @@ class AudienceCatalogueProvider(val session: SparkSession)
   private val source_alias: String = "source"
 
   def uri: String = s"${customer_prefix}.public_works.fact_audience_member"
+//  table should be partitioned by audience
   def create(): DeltaTable = {
     val table: DeltaTable = {
       DeltaTable.create()
