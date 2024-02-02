@@ -6,7 +6,6 @@ import collection.JavaConverters._
 import io.delta.tables.DeltaTable
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
-
 import java.sql.Timestamp
 
 case class AudienceStatusSchema(name: String, timestamp: Timestamp, status: String, dac_id: String, rqs_id: String)
@@ -14,25 +13,22 @@ case class DacPollResponse(name: String, status: String, dac_id: String, rqs_id:
 class AudienceStatusProvider(val session: SparkSession)
   extends Serializable
   with ConfigProvider {
-
   def uri: String = s"${customer_prefix}.public_works.fact_dac_poll_status"
-
   def read: DataFrame = session.read.table(uri)
-
   def getHistory(audience: Audience): Seq[AudienceStatusSchema] = {
     import session.implicits._
     this.read.as[AudienceStatusSchema]
       .filter(col("name").equalTo(audience.name))
       .collectAsList()
       .asScala
-      .sortWith(_.timestamp.toString < _.timestamp.toString)
+      .sortWith(_.timestamp.toInstant.toEpochMilli < _.timestamp.toInstant.toEpochMilli)
   }
 
   def getCurrentStatus(audience: Audience) = {
     getHistory(audience).reverse.head
   }
 
-  def appendPoll(poll: DacPollResponse) = {
+  def append(poll: DacPollResponse) = {
     import session.implicits._
     val status = AudienceStatusSchema(
       name = poll.name,
@@ -42,7 +38,7 @@ class AudienceStatusProvider(val session: SparkSession)
       rqs_id = poll.rqs_id
     )
 
-    val df = session.sparkContext.parallelize(List(status)).toDF()
+    val df = Seq(status).toDF()
 
     df.write
       .format("delta")

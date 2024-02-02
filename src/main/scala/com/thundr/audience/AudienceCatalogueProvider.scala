@@ -13,7 +13,6 @@ class AudienceCatalogueProvider(val session: SparkSession)
   private val source_alias: String = "source"
 
   def uri: String = s"${customer_prefix}.public_works.fact_audience_member"
-//  table should be partitioned by audience
   def create(): DeltaTable = {
     val table: DeltaTable = {
       DeltaTable.create()
@@ -23,11 +22,11 @@ class AudienceCatalogueProvider(val session: SparkSession)
         .addColumn("last_published",  dataType = "DATE", nullable = false)
         .addColumn("start_date",  dataType = "DATE", nullable = false)
         .addColumn("end_date",  dataType = "DATE", nullable = true)
+        .partitionedBy("audience")
         .execute()
     }
     table
   }
-
   def insertNewAudience(audience: Audience): Unit = {
     audience.seed
       .withColumn("audience", lit(audience.name))
@@ -38,7 +37,12 @@ class AudienceCatalogueProvider(val session: SparkSession)
       .write
       .format("delta")
       .mode(SaveMode.Append)
+      .partitionBy("audience")
       .saveAsTable(uri)
+  }
+  def deleteAudience(audience: Audience): Unit = {
+    val table = DeltaTable.forPath(session, uri)
+    table.delete(col("audience").equalTo(audience.name))
   }
 //  need to explore whenNotMatedBy source to set non-null end_Date to represent audience membership removal
   def merge(audience: Audience): Unit = {
@@ -74,12 +78,6 @@ class AudienceCatalogueProvider(val session: SparkSession)
         ))
     merged.execute()
   }
-
-  def read: DataFrame = {
-    session.read.table(uri)
-  }
-
-  def readAudinece(audience: Audience): DataFrame = {
-    session.read.table(uri).filter(col("audience").equalTo(lit(audience.name)))
-  }
+  def read: DataFrame = session.read.table(uri)
+  def readAudinece(audience: Audience): DataFrame = read.filter(col("audience").equalTo(audience.name))
 }

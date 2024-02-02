@@ -12,10 +12,11 @@ import java.nio.charset.StandardCharsets
 object DacClient
   extends Serializable {
 
-  lazy val dac_api_key: String = scala.util.Properties.envOrNone("DAC_API_KEY").get
+  lazy val dac_api_key: String = scala.util.Properties.envOrNone("DAC").get
   lazy val customer_prefix: String = scala.util.Properties.envOrNone("CUSTOMER_PREFIX").get
   private val client = HttpClientBuilder.create().build()
   val root: String = "https://us-prod-dac-api.publicisspine.io/"
+  implicit val pollRw: ReadWriter[DacPollResponse] = macroRW
 
   def postNewAudience(audience_name: String): String = {
     val location: String = s"$customer_prefix.audience_xfer.${audience_name}"
@@ -30,13 +31,15 @@ object DacClient
     IOUtils.toString(res.getEntity().getContent(), StandardCharsets.UTF_8)
   }
 
-  def pollAudienceStatus(dac_id: String): String = {
+  def pollAudienceStatus(dac_id: String): DacPollResponse = {
     val uri: String = s"${root}/v1/transfer/${dac_id}"
     val req = new HttpGet(uri)
     req.addHeader(HttpHeaders.CONTENT_TYPE, "application/json")
     req.addHeader("x-discovery-access-token", dac_api_key)
     val res = client.execute(req)
-    IOUtils.toString(res.getEntity().getContent(), Charset.defaultCharset())
+    val json = ujson.read(IOUtils.toString(res.getEntity().getContent(), Charset.defaultCharset()))
+    val pollStatus: DacPollResponse = read[DacPollResponse](json)
+    pollStatus
   }
 
   def refreshExistingAudience(audience_name: String, dac_id: String): String = {

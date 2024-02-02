@@ -1,14 +1,14 @@
 package com.thundr.data
 
-import com.thundr.core.enums.{CustomerPrefix}
-import org.apache.spark.sql.SparkSession
+import com.thundr.config._
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-case class DataSource(
-                       name: String,
-                       namespace: String,
-                       prefix: String,
-                       spark: SparkSession
-                     ) {
+abstract class DataSource
+  extends ConfigProvider {
+  lazy val session: SparkSession = SparkSession.getActiveSession.get
+  def namespace: String
+  def name: String
+  def prefix: String
   def uri: String = prefix + "." + namespace + "." + name
-  def read() = spark.read.table(uri)
+  def read: DataFrame = session.read.table(uri)
 }

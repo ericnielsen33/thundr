@@ -9,5 +9,6 @@ case class AudienceMetaSchema(
                          refresh_cadence_days: Option[Int] = None,
                          collection: Option[String] = None,
                          ttl_days: Int = 270,
-                         premium_datasets: Option[String] = None
+                         premium_datasets: Option[String] = None,
+                         dac_id: Option[String] = None
                        )

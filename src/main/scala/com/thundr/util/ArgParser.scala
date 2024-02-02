@@ -1,6 +1,6 @@
 package com.thundr.util
 
-case class ArgParser(input: Array[String], val mapping: Map[String, String] = Map()) {
+case class ArgParser(input: Array[String], mapping: Map[String, String] = Map()) {
   def parse(args: Array[String]): ArgParser = {
     val argMapping = args
       .map {_.split("=")}
