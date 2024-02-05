@@ -103,7 +103,7 @@ case class Audience(
     audienceLifecycleProvider.append(event)
   }
   def activateToDiscovery(): Audience = {
-    val response = DacClient.postNewAudience(this.name)
+    val response = DacClient.postNewAudience(name, xfer_location)
     val json = ujson.read(response)
     val dac_id_res = json("dac_id").str
     val event: AudienceLifecycleSchema = AudienceLifecycleSchema(
@@ -137,5 +137,9 @@ case class Audience(
     val new_dac_id = ujson.read(hist_dac_id).str
     Audience(session, seed, name, new_dac_id, id)
   }
-  def deleteAudience() = audienceCatalogueProvider.deleteAudience(this)
+  def deleteAudience() = {
+    val event: AudienceLifecycleSchema = AudienceLifecycleSchema(name, new Timestamp(System.currentTimeMillis()), "DELETE", None, None)
+    audienceCatalogueProvider.deleteAudience(this)
+    audienceLifecycleProvider.append(event)
+  }
 }

@@ -18,8 +18,7 @@ object DacClient
   val root: String = "https://us-prod-dac-api.publicisspine.io/"
   implicit val pollRw: ReadWriter[DacPollResponse] = macroRW
 
-  def postNewAudience(audience_name: String): String = {
-    val location: String = s"$customer_prefix.audience_xfer.${audience_name}"
+  def postNewAudience(audience_name: String, location: String): String = {
     val uri: String = s"${root}/v1/prospect/transfer"
     val entity: Map[String, String] = Map("name" -> audience_name, "location" -> location)
     val json: String = write(entity)
@@ -42,8 +41,7 @@ object DacClient
     pollStatus
   }
 
-  def refreshExistingAudience(audience_name: String, dac_id: String): String = {
-    val location: String = s"$customer_prefix.audience_xfer.${audience_name}"
+  def refreshExistingAudience(audience_name: String, location: String, dac_id: String): String = {
     val uri: String = s"${root}/v1/prospect/transfer"
     val entity: Map[String, String] = Map(
       "name" -> audience_name, "location" -> location, "dac_id" -> dac_id
