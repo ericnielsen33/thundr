@@ -1,7 +1,9 @@
 package com.thundr.audience
 
+import com.thundr.config.ConfigProvider
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
+
 import java.sql.Timestamp
 
 
@@ -10,17 +12,15 @@ case class Audience(
                      seed: DataFrame,
                      name: String,
                      dac_id: String = "",
-                     id: String = "individual_identity_key") {
+                     id: String = "individual_identity_key") extends ConfigProvider{
 
   private val leftAlias: String = "left"
   private val rightAlias: String = "right"
-  lazy val customer_prefix: String = scala.util.Properties.envOrNone("CUSTOMER_PREFIX").get
-  lazy val audeince_xfer_root: String = scala.util.Properties.envOrNone("AUDIENCE_XFER_ROOT").get
   private val audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session)
   private val audienceLifecycleProvider: AudienceLifecycleProvider = new AudienceLifecycleProvider(session)
   private val audienceStatusProvider: AudienceStatusProvider = new AudienceStatusProvider(session)
-  val xfer_location: String = s"${customer_prefix}.audience_xfer.${name.toLowerCase()}"
-  val xfer_path: String = s"${audeince_xfer_root}/${name}.csv"
+  val xfer_location: String = s"${customer_prefix}.audience_xfer.${name.toLowerCase()}".trim()
+  val xfer_path: String = s"${audeince_xfer_root}/${name}.csv".trim()
 
   def apply(tasks: (Audience => Unit)*): Unit = tasks.foreach(_.apply(this))
   def readFromCatalogue(): DataFrame = audienceCatalogueProvider.readAudinece(this)

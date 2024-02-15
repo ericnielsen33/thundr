@@ -13,7 +13,6 @@ object DacClient
   extends Serializable {
 
   lazy val dac_api_key: String = scala.util.Properties.envOrNone("DAC").get
-  lazy val customer_prefix: String = scala.util.Properties.envOrNone("CUSTOMER_PREFIX").get
   private val client = HttpClientBuilder.create().build()
   val root: String = "https://us-prod-dac-api.publicisspine.io/"
   implicit val pollRw: ReadWriter[DacPollResponse] = macroRW
