@@ -11,4 +11,5 @@ abstract class DataSource
   def prefix: String
   def uri: String = prefix + "." + namespace + "." + name
   def read: DataFrame = session.read.table(uri)
+  override def toString: String = uri
 }

@@ -92,7 +92,8 @@ case class Audience(
     name,
     new Timestamp(System.currentTimeMillis()),
     "PERSIST_XFER",
-    None, None)) = {
+    None,
+    Option(upickle.default.write(Map("xfer_location" -> xfer_location))))) = {
     this.readFromCatalogue.select(col("individual_identity_key")).distinct()
       .write
       .mode(SaveMode.Overwrite)
@@ -122,7 +123,7 @@ case class Audience(
     pollResponse
   }
   def dropXferTable(): Unit = {
-    val event: AudienceLifecycleSchema = AudienceLifecycleSchema(name, new Timestamp(System.currentTimeMillis()), "DROP_XFER_TABLE", None, None)
+    val event: AudienceLifecycleSchema = AudienceLifecycleSchema(name, new Timestamp(System.currentTimeMillis()), "DROP_XFER_TABLE", None, Option(upickle.default.write(Map("xfer_location" -> xfer_location))))))
     session.sql(s"DROP TABLE IF EXISTS ${xfer_location}")
     audienceLifecycleProvider.append(event)
   }
