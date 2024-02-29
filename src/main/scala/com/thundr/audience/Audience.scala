@@ -3,9 +3,10 @@ package com.thundr.audience
 import com.thundr.config.ConfigProvider
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
-
 import java.sql.Timestamp
 
+//consider having an audience class w/ name only (no df seed) for easy use of many utility methods.
+//consider creating audience manager that can use metadata to manage lifcyle of all audiences.
 
 case class Audience(
                      session: SparkSession,
@@ -123,7 +124,12 @@ case class Audience(
     pollResponse
   }
   def dropXferTable(): Unit = {
-    val event: AudienceLifecycleSchema = AudienceLifecycleSchema(name, new Timestamp(System.currentTimeMillis()), "DROP_XFER_TABLE", None, Option(upickle.default.write(Map("xfer_location" -> xfer_location))))))
+    val event: AudienceLifecycleSchema = AudienceLifecycleSchema(
+      name,
+      new Timestamp(System.currentTimeMillis()),
+      "DROP_XFER_TABLE",
+      None,
+      Option(upickle.default.write(Map("xfer_location" -> xfer_location))))
     session.sql(s"DROP TABLE IF EXISTS ${xfer_location}")
     audienceLifecycleProvider.append(event)
   }
