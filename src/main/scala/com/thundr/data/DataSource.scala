@@ -1,7 +1,8 @@
 package com.thundr.data
 
 import com.thundr.config._
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession, Column}
+import org.apache.spark.sql.functions._
 
 abstract class DataSource
   extends ConfigProvider {
@@ -11,6 +12,7 @@ abstract class DataSource
   def prefix: String
   def uri: String = prefix + "." + namespace + "." + name
   def read: DataFrame = session.read.table(uri)
-  def apply(colName: String) = read.apply(colName)
+  def apply(colName: String): Column = col(s"${this.name}.${colName}")
+  def dimensionalized: DataFrame = this.read
   override def toString: String = uri
 }

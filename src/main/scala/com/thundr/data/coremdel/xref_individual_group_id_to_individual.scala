@@ -12,10 +12,11 @@ case object xref_individual_group_id_to_individual
 
   override def prefix: String = customer_prefix
 
-  def dimensionalized: DataFrame = this.read.as(name)
+  override def dimensionalized: DataFrame = this.read.as(name)
     .join(
-      dim_individual_group_type.read.as(dim_individual_group_type.name),
-      col(s"${name}.individual_group_type_id") === col(s"${dim_individual_group_type.name}.individual_group_type_id"),
+      dim_individual_group_type.dimensionalized.as(dim_individual_group_type.name),
+      col(s"${dim_individual_group_type.name}.individual_group_type_id") === col(s"${this.name}.individual_group_type_id"),
+//      dim_individual_group_type("individual_group_type_id") === this("individual_group_type_id"),
       "left"
     )
 }
