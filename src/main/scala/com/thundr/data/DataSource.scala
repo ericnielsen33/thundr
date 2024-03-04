@@ -12,7 +12,8 @@ abstract class DataSource
   def prefix: String
   def uri: String = prefix + "." + namespace + "." + name
   def read: DataFrame = session.read.table(uri)
-  def apply(colName: String): Column = col(s"${this.name}.${colName}")
-  def dimensionalized: DataFrame = this.read
+  def apply(colName: String): Column = col(s"$name.$colName")
+  def withAlias: DataFrame = this.read.as(this.name)
+  def dimensionalized: DataFrame = withAlias
   override def toString: String = uri
 }

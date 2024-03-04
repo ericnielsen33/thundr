@@ -9,9 +9,9 @@ case object fact_conversion_detail
   override def namespace: String = "coremodel"
   override def prefix: String = customer_prefix
 
-  override def dimensionalized: DataFrame = this.read.as(this.name)
+  override def dimensionalized: DataFrame = this.withAlias
     .join(
-      dim_product.dimensionalized.as(dim_product.name),
+      dim_product.dimensionalized,
       dim_product("sku_id") === this("sku_id"),
       "left"
     )

@@ -11,10 +11,10 @@ case object fact_inmarket_segment
 
   override def prefix: String = default_prefix
 
-  override def dimensionalized: DataFrame = this.read.as(this.name)
+  override def dimensionalized: DataFrame = this.withAlias
     .join(
-      dim_inmarket_segment.dimensionalized.as(dim_inmarket_segment.name),
-      col(s"${this.name}.inmarket_segment_id") === col(s"${dim_inmarket_segment.name}.inmarket_segment_id"),
+      dim_inmarket_segment.dimensionalized,
+      dim_inmarket_segment("inmarket_segment_id").equalTo(this("inmarket_segment_id")),
       "left"
     )
 }

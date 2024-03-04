@@ -12,10 +12,9 @@ case object dim_action_type
 
   override def prefix: String = customer_prefix
 
-  override def dimensionalized: DataFrame = this.read.as(this.name)
+  override def dimensionalized: DataFrame = this.withAlias
     .join(
-      dim_funnel_stage.dimensionalized.as(dim_funnel_stage.name),
-//      col(s"${dim_funnel_stage.name}.funnel_stage_id") === col(s"${this.name}.funnel_stage_id"),
+      dim_funnel_stage.dimensionalized,
       dim_funnel_stage("funnel_stage_id") === this("funnel_stage_id"),
       "left"
     )
