@@ -1,8 +1,7 @@
-package com.thundr.data.coremdel
+package com.thundr.data.coremodel
 
 import com.thundr.data.DataSource
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
 
 case object dim_action_type
   extends DataSource {

@@ -1,9 +1,10 @@
-package com.thundr.data.coremdel
+package com.thundr.data.coremodel
 
 import com.thundr.data.DataSource
-case object dim_user_identity_type
+
+case object dim_online_event
   extends DataSource {
-  override def name: String = "dim_user_identity_type"
+  override def name: String = "dim_online_event"
 
   override def namespace: String = "coremodel"
 

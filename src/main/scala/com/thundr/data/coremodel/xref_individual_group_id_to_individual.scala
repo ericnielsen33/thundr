@@ -1,12 +1,12 @@
-package com.thundr.data.coremdel
+package com.thundr.data.coremodel
 
 import com.thundr.data.DataSource
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
-case object xref_individual_to_child
+case object xref_individual_group_id_to_individual
   extends DataSource {
-  override def name: String = "xref_individual_to_child"
+  override def name: String = "xref_individual_group_id_to_individual"
 
   override def namespace: String = "coremodel"
 
@@ -14,8 +14,8 @@ case object xref_individual_to_child
 
   override def dimensionalized: DataFrame = this.withAlias
     .join(
-      dim_user_identity_type.dimensionalized,
-      dim_user_identity_type("user_identity_type_id") === this("user_identity_type_id"),
+      dim_individual_group_type.dimensionalized,
+      dim_individual_group_type("individual_group_type_id") === this("individual_group_type_id"),
       "left"
     )
 }

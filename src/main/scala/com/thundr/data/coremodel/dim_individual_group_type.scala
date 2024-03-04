@@ -1,10 +1,11 @@
-package com.thundr.data.coremdel
+package com.thundr.data.coremodel
 
 import com.thundr.data.DataSource
-
-case object dim_demographic_metadata
+case object dim_individual_group_type
   extends DataSource {
-  override def name: String = "dim_demographic_metadata"
+  override def name: String = "dim_individual_group_type"
+
   override def namespace: String = "coremodel"
+
   override def prefix: String = default_prefix
 }

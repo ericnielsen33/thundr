@@ -1,4 +1,4 @@
-package com.thundr.data.coremdel
+package com.thundr.data.coremodel
 
 import com.thundr.data.DataSource
 case object dim_funnel_stage
