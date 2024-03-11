@@ -12,7 +12,7 @@ case class AudineceCollection[T](
   def mkAudience(elem: T): Audience = {
     val seed: DataFrame = audience_builder(elem)
     val name = naming_convention(elem)
-    val audience = Audience(session, seed, name)
+    val audience = Audience(seed, name)
     audience
   }
   def generateAll(): Unit = ???

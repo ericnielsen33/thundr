@@ -4,6 +4,7 @@ import com.thundr.config._
 import org.apache.spark.sql.{DataFrame, SparkSession, Column}
 import org.apache.spark.sql.functions._
 
+//consider adding schema member default to Nil
 abstract class DataSource
   extends ConfigProvider {
   lazy val session: SparkSession = SparkSession.getActiveSession.get
