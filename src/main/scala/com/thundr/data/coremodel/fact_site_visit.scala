@@ -15,11 +15,14 @@ case object fact_site_visit extends DataSource {
       dim_action_type.dimensionalized,
       dim_action_type("action_type_id") === this("action_type_id"),
       "left")
+    .drop(dim_action_type("action_type_id"))
+    .drop(dim_action_type("funnel_stage_id"))
     .as(this.name)
     .join(
       dim_online_event.dimensionalized,
       dim_online_event("online_event_id") === this("online_event_id"),
       "left")
+    .drop(dim_online_event("online_event_id"))
 
   def withCoreID: DataFrame = this.withAlias
     .join(
