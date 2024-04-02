@@ -6,7 +6,6 @@ import  org.apache.spark.sql.functions._
 package object geo {
 
   private val EARTH_RADIUS_KM: Double = 6378.14
-
   private val EARTH_RADIUS_MILES: Double = 3963.19
   private def haversine(origin_lat: Column, origin_lon: Column, dest_lat: Column, dest_lon: Column, earth_radius: Double): Column = {
     def helper = {
@@ -23,5 +22,4 @@ package object geo {
   def haversine_miles(origin_lat: Column, origin_lon: Column, dest_lat: Column, dest_lon: Column): Column = {
     haversine(origin_lat: Column, origin_lon: Column, dest_lat: Column, dest_lon: Column, EARTH_RADIUS_MILES)
   }
-
 }
