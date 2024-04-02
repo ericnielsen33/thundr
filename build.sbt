@@ -1,7 +1,7 @@
 import java.time.LocalDate
 
 val project_major_version = "0.5"
-val date = LocalDate.now().toString
+lazy val date = LocalDate.now().toString
 ThisBuild / version :=  s"$project_major_version-SNAPSHOT$date"
 
 ThisBuild / scalaVersion := "2.12.14"
