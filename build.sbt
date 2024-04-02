@@ -1,6 +1,14 @@
-ThisBuild / version := "0.4.0-SNAPSHOT"
+import java.time.LocalDate
+
+val project_major_version = "0.5"
+val date = LocalDate.now().toString
+ThisBuild / version :=  s"$project_major_version-SNAPSHOT$date"
 
 ThisBuild / scalaVersion := "2.12.14"
+
+artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+  artifact.name + "-" + module.revision + "." + artifact.extension
+}
 
 val sparkVersion = "3.5.0"
 
@@ -20,5 +28,4 @@ libraryDependencies ++= Seq(
   "org.scala-lang" %% "toolkit" % "0.1.7",
   "io.delta" %% "delta-core" % "2.1.0" % "provided",
   "org.yaml" % "snakeyaml" % "2.0",
-//  "com.github.nscala-time" %% "nscala-time" % "2.32.0" % "provided"
   ) 
