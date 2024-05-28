@@ -11,13 +11,12 @@ artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
 }
 
 val sparkVersion = "3.5.0"
+val circeVersion = "0.15.0-M1"
 
 lazy val root = (project in file("."))
   .settings(
     name := "thundr"
   )
-
-resolvers += "Akka library repository".at("https://repo.akka.io/maven")
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
@@ -25,7 +24,12 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
   "org.apache.httpcomponents" % "httpclient" % "4.5.14" % "provided",
   "org.apache.httpcomponents" % "httpcore" % "4.4.16" % "provided",
-  "org.scala-lang" %% "toolkit" % "0.1.7",
+  "io.circe" %% "circe-core" % circeVersion % "provided",
+  "io.circe" %% "circe-generic" % circeVersion % "provided",
+  "io.circe" %% "circe-parser" % circeVersion % "provided",
   "io.delta" %% "delta-core" % "2.1.0" % "provided",
-  "org.yaml" % "snakeyaml" % "2.0",
+  "org.json4s" %% "json4s-core" % "3.7.0-M11",
+//  "org.scala-lang" %% "toolkit" % "0.1.7" % "provided"
+//  "com.lihaoyi" %% "upickle" % "3.2.0" % "provided",
+//  "com.lihaoyi" %% "ujson" % "3.2.0" % "provided"
   ) 

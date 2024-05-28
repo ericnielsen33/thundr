@@ -9,7 +9,7 @@ import org.apache.spark.sql.functions._
 import java.sql.Timestamp
 
 case class AudienceStatusSchema(name: String, timestamp: Timestamp, status: String, dac_id: String, rqs_id: String)
-case class DacPollResponse(name: String, status: String, dac_id: String, rqs_id: String)
+
 class AudienceStatusProvider(val session: SparkSession)
   extends Serializable
   with ConfigProvider {

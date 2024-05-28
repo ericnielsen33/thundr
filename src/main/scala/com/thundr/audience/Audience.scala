@@ -1,10 +1,12 @@
 package com.thundr.audience
 
 import com.thundr.config.{ConfigProvider, SessionProvider}
-import org.apache.spark.sql.{Column, DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
-
 import java.sql.Timestamp
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.Serialization
 
 //consider having an audience class w/ name only (no df seed) for easy use of many utility methods.
 //consider creating audience manager that can use metadata to manage lifecyle of all audiences.
@@ -16,7 +18,7 @@ case class Audience( seed: DataFrame,
                      dac_id: String = "",
                      id: String = "individual_identity_key")
   extends ConfigProvider with SessionProvider {
-
+  implicit val formats = org.json4s.DefaultFormats
   private val audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session)
   private val audienceLifecycleProvider: AudienceLifecycleProvider = new AudienceLifecycleProvider(session)
   private val audienceStatusProvider: AudienceStatusProvider = new AudienceStatusProvider(session)
@@ -81,12 +83,15 @@ case class Audience( seed: DataFrame,
     audienceLifecycleProvider.append(event)
   }
 
-  def persistXfer(event:AudienceLifecycleSchema = AudienceLifecycleSchema(
-    name,
-    new Timestamp(System.currentTimeMillis()),
-    "PERSIST_XFER",
-    None,
-    Option(upickle.default.write(Map("xfer_location" -> xfer_location))))) = {
+  def persistXfer()  = {
+    val data: Map[String, String] =  Map("xfer_location" -> xfer_location)
+    val json: String = Serialization.write(data)
+    val event = AudienceLifecycleSchema(
+      name,
+      new Timestamp(System.currentTimeMillis()),
+      "PERSIST_XFER",
+      None,
+      Option(json))
     this.readFromCatalogue.select(col("individual_identity_key")).distinct()
       .write
       .mode(SaveMode.Overwrite)
@@ -97,43 +102,49 @@ case class Audience( seed: DataFrame,
     audienceLifecycleProvider.append(event)
   }
   def activateToDiscovery(): Audience = {
-    val response = DacClient.postNewAudience(name, xfer_location)
-    val json = ujson.read(response)
-    val dac_id_res = json("dac_id").str
+    val response: String = DacClient.postNewAudience(name, xfer_location)
+    val decoded = DacPostNewAudienceResponse.decode(response)
+
+    val data: Map[String, String] =  Map("dac_id" -> decoded.dac_id)
+    val json: String = Serialization.write(data)
     val event: AudienceLifecycleSchema = AudienceLifecycleSchema(
       name,
       new Timestamp(System.currentTimeMillis()),
       "TRANSFER_OK",
       None,
-      Option(upickle.default.write(Map("dac_id" -> dac_id_res)))
+      Option(json)
     )
     audienceLifecycleProvider.append(event)
-    Audience(seed, name, dac_id_res, id)
+    Audience(seed, name, decoded.dac_id, id)
   }
   def pollStatus(): DacPollResponse = {
-    val pollResponse = DacClient.pollAudienceStatus(this.dac_id)
-    audienceStatusProvider.append(pollResponse)
-    pollResponse
+    val response: DacPollResponse = DacClient.pollAudienceStatus(this.dac_id)
+    audienceStatusProvider.append(response)
+    response
   }
   def dropXferTable(): Unit = {
+    val data: Map[String, String] =  Map("xfer_location" -> xfer_location)
+    val json: String = Serialization.write(data)
     val event: AudienceLifecycleSchema = AudienceLifecycleSchema(
       name,
       new Timestamp(System.currentTimeMillis()),
       "DROP_XFER_TABLE",
       None,
-      Option(upickle.default.write(Map("xfer_location" -> xfer_location))))
+      Option(json)
+    )
     session.sql(s"DROP TABLE IF EXISTS ${xfer_location}")
     audienceLifecycleProvider.append(event)
   }
   def withName(newName: String): Audience = Audience(seed, newName, dac_id, id)
+  def withDacId(new_dac_id: String): Audience = Audience(seed, name, new_dac_id, id)
 
   def withPersistedDacId(): Audience = {
-    val hist_dac_id = audienceLifecycleProvider.getHistory(this)
-      .filter(_.event.equals("TRANSFER_OK"))
-      .head
-      .props_json
-      .getOrElse(upickle.default.write(Map("dac_id" -> "n/a")).toString)
-    val new_dac_id = ujson.read(hist_dac_id).str
+//    val hist_dac_id = audienceLifecycleProvider.getHistory(this)
+//      .filter(_.event.equals("TRANSFER_OK"))
+//      .head
+//      .props_json
+//      .getOrElse(write(Map("dac_id" -> "n/a")))
+    val new_dac_id = "TODO"
     Audience(seed, name, new_dac_id, id)
   }
   def deleteAudience() = {

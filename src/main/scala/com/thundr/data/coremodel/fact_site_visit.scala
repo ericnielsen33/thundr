@@ -1,9 +1,10 @@
 package com.thundr.data.coremodel
 
-import com.thundr.data.DataSource
+import com.thundr.data.{CoreID, DataSource}
 import org.apache.spark.sql.DataFrame
 
-case object fact_site_visit extends DataSource {
+case object fact_site_visit
+  extends DataSource {
   override def name: String = "fact_site_visit"
 
   override def namespace: String = "coremodel"
@@ -29,6 +30,7 @@ case object fact_site_visit extends DataSource {
       xref_individual_to_child.dimensionalized,
       this("online_identity_key").equalTo(xref_individual_to_child("user_identity_key")) &&
         xref_individual_to_child("user_identity_type_id").equalTo(3),
-      "left"
-    )
+      "left")
+    .as(name)
+
 }

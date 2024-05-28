@@ -1,9 +1,10 @@
 package com.thundr.data.experian
 
-import com.thundr.data.DataSource
+import com.thundr.data.{CoreID, DataSource}
 import org.apache.spark.sql.DataFrame
 case object fact_experian_attribute
-  extends DataSource {
+  extends DataSource
+  with CoreID {
   override def name: String = "fact_experian_attribute"
 
   override def namespace: String = "experian"

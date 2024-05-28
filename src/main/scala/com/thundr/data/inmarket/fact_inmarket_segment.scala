@@ -1,10 +1,11 @@
 package com.thundr.data.inmarket
 
-import com.thundr.data.DataSource
+import com.thundr.data.{CoreID, DataSource}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 case object fact_inmarket_segment
-  extends DataSource {
+  extends DataSource
+  with CoreID {
   override def name: String = "fact_inmarket_segment"
 
   override def namespace: String = "inmarket_audience"

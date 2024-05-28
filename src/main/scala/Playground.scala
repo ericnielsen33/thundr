@@ -1,6 +1,7 @@
 import com.thundr.util.MeasurementCalendar
 
 import java.time.{LocalDate, DayOfWeek, Period}
+import com.thundr.data.coremodel.fact_conversion_detail
 
 object Playground extends App {
 
@@ -17,5 +18,6 @@ object Playground extends App {
     .find(_.getDayOfWeek.equals(DayOfWeek.MONDAY))
     .get
 
-  println(nearestStart)
+  println(fact_conversion_detail.individual_identity_key)
+
 }
