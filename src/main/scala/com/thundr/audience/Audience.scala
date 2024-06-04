@@ -102,7 +102,7 @@ case class Audience( seed: DataFrame,
     audienceLifecycleProvider.append(event)
   }
   def activateToDiscovery(): Audience = {
-    val response: String = DacClient.postNewAudience(name, xfer_location)
+    val response: String = DacClientV2.postNewAudience(name, xfer_location)
     val decoded = DacPostNewAudienceResponse.decode(response)
 
     val data: Map[String, String] =  Map("dac_id" -> decoded.dac_id)
@@ -118,7 +118,7 @@ case class Audience( seed: DataFrame,
     Audience(seed, name, decoded.dac_id, id)
   }
   def pollStatus(): DacPollResponse = {
-    val response: DacPollResponse = DacClient.pollAudienceStatus(this.dac_id)
+    val response: DacPollResponse = DacClientV2.pollAudienceStatus(this.dac_id)
     audienceStatusProvider.append(response)
     response
   }

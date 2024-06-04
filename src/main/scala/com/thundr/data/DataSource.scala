@@ -9,8 +9,7 @@ import org.apache.spark.sql.types.StructType
 
 //consider adding schema member default to Nil
 abstract class DataSource
-  extends ConfigProvider {
-  lazy val session: SparkSession = SparkSession.getActiveSession.get
+  extends ConfigProvider with SessionProvider {
   def namespace: String
   def name: String
   def prefix: String

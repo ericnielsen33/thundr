@@ -12,7 +12,7 @@ import org.json4s.jackson.JsonMethods._
 import org.json4s._
 
 
-object DacClient
+object DacClientV2
     extends Serializable {
 
   implicit val formats = org.json4s.DefaultFormats
