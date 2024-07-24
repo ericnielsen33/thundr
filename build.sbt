@@ -27,6 +27,6 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion % "provided",
   "io.circe" %% "circe-generic" % circeVersion % "provided",
   "io.circe" %% "circe-parser" % circeVersion % "provided",
-  "io.delta" %% "delta-core" % "2.1.0" % "provided",
+  "io.delta" %% "delta-spark" % "3.2.0" % "provided",
   "org.json4s" %% "json4s-core" % "3.7.0-M11",
   ) 
