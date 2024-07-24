@@ -3,9 +3,9 @@ package com.thundr.audience
 import com.thundr.config.{ConfigProvider, SessionProvider}
 import org.apache.spark.sql.{Column, DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
+import com.thundr.audience.{DacClientV3 => DacClient }
+import com.thundr.data.coremodel.xref_individual_group_id_to_individual
 import java.sql.Timestamp
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 
 //consider having an audience class w/ name only (no df seed) for easy use of many utility methods.
@@ -16,7 +16,8 @@ import org.json4s.jackson.Serialization
 case class Audience( seed: DataFrame,
                      name: String,
                      dac_id: String = "",
-                     id: String = "individual_identity_key")
+                     id: String = "individual_identity_key",
+                     data_sources: List[String] = List.empty)
   extends ConfigProvider with SessionProvider {
   implicit val formats = org.json4s.DefaultFormats
   private val audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session)
@@ -36,7 +37,16 @@ case class Audience( seed: DataFrame,
       .get(0)
       .getBoolean(0)
   }
-  def audienceCount: Int = readFromCatalogue().count().toInt
+  def audienceCatalogueCount: Int = readFromCatalogue().count().toInt
+
+  def householdCount: Int = readFromCatalogue().as("this")
+    .join(
+      xref_individual_group_id_to_individual.dimensionalized,
+      xref_individual_group_id_to_individual.individual_identity_key
+        .equalTo("this.individual_identity_key") &&
+        xref_individual_group_id_to_individual("individual_group_type_name").equalTo("TSP HH"),
+      "left")
+    .count().toInt
 
   def overlaps(other: Audience): Boolean = {
     this.withAlias
@@ -102,7 +112,7 @@ case class Audience( seed: DataFrame,
     audienceLifecycleProvider.append(event)
   }
   def activateToDiscovery(): Audience = {
-    val response: String = DacClientV2.postNewAudience(name, xfer_location)
+    val response: String = DacClient.postNewAudience(name, xfer_location, data_sources)
     val decoded = DacPostNewAudienceResponse.decode(response)
 
     val data: Map[String, String] =  Map("dac_id" -> decoded.dac_id)
@@ -118,7 +128,7 @@ case class Audience( seed: DataFrame,
     Audience(seed, name, decoded.dac_id, id)
   }
   def pollStatus(): DacPollResponse = {
-    val response: DacPollResponse = DacClientV2.pollAudienceStatus(this.dac_id)
+    val response: DacPollResponse = DacClient.pollAudienceStatus(this.dac_id)
     audienceStatusProvider.append(response)
     response
   }

@@ -1,7 +1,7 @@
 package com.thundr.data
 
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Column
+
 trait CoreID {
 
   this: DataSource =>

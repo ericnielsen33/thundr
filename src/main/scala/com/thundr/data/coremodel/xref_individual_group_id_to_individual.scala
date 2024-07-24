@@ -1,7 +1,7 @@
 package com.thundr.data.coremodel
 
 import com.thundr.data.{CoreID, DataSource}
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Column}
 import org.apache.spark.sql.functions._
 
 case object xref_individual_group_id_to_individual
@@ -21,4 +21,8 @@ case object xref_individual_group_id_to_individual
     )
     .drop(dim_individual_group_type("individual_group_type_id") )
     .as(name)
+
+  def individual_group_identity_key: Column = this("individual_group_identity_key")
+
+  def individual_group_type_id: Column = this("individual_group_type_id")
 }
