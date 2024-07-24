@@ -25,7 +25,7 @@ object DacClientV3
                        location: String,
                        data_sources: List[String] = List.empty
                      ): String = {
-    val uri: String = s"${root}/v3/transfer"
+    val uri: String = s"${root}v3/transfer"
     val entity: Map[String, Object] = Map(
       "name" -> audience_name,
       "location" -> location,
@@ -42,7 +42,7 @@ object DacClientV3
 
   def pollAudienceStatus(dac_id: String): DacPollResponse = {
     implicit val formats: Formats = org.json4s.DefaultFormats
-    val uri: String = s"${root}/v3/transfer/${dac_id}"
+    val uri: String = s"${root}v3/transfer/${dac_id}"
     val req = new HttpGet(uri)
     req.addHeader(HttpHeaders.CONTENT_TYPE, "application/json")
     req.addHeader("x-discovery-access-token", dac_api_key)
@@ -57,7 +57,7 @@ object DacClientV3
                                dac_id: String,
                                data_sources: List[String] = List.empty
                              ): String = {
-    val uri: String = s"${root}/v3/transfer"
+    val uri: String = s"${root}v3/transfer"
     val entity: Map[String, Object] = Map(
       "name" -> audience_name,
       "location" -> location,
