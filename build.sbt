@@ -29,7 +29,4 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-parser" % circeVersion % "provided",
   "io.delta" %% "delta-core" % "2.1.0" % "provided",
   "org.json4s" %% "json4s-core" % "3.7.0-M11",
-//  "org.scala-lang" %% "toolkit" % "0.1.7" % "provided"
-//  "com.lihaoyi" %% "upickle" % "3.2.0" % "provided",
-//  "com.lihaoyi" %% "ujson" % "3.2.0" % "provided"
   ) 
