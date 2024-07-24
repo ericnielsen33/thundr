@@ -10,7 +10,7 @@ import collection.JavaConverters._
 
 
 // consider extending the class with session proivder and changing into an object
-case class AudienceLifecycleSchema(name: String, timestamp: Timestamp, event: String, collection: Option[String], props_json: Option[String])
+
 class AudienceLifecycleProvider(val session: SparkSession)
  extends Serializable
  with ConfigProvider {
