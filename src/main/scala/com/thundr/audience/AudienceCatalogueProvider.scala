@@ -4,6 +4,7 @@ import com.thundr.config.ConfigProvider
 import io.delta.tables.DeltaTable
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
 
 class AudienceCatalogueProvider(val session: SparkSession)
   extends Serializable
@@ -27,57 +28,94 @@ class AudienceCatalogueProvider(val session: SparkSession)
     }
     table
   }
-  def insertNewAudience(audience: Audience): Unit = {
-    audience.seed
-      .withColumn("audience", lit(audience.name))
-      .withColumnRenamed(audience.id, "individual_identity_key")
-      .withColumn("last_published", current_date())
-      .withColumn("start_date", current_date())
-      .withColumn("end_date", lit(null))
+
+  def insertNewAudience(name: String, dataFrame: DataFrame) = {
+   val toInsert = dataFrame
+      .select(
+        col("individual_identity_key"),
+        lit(name).as("audience"),
+        current_date().as("last_published"),
+        current_date().as("start_date"),
+        lit(null).as("end_date").cast(DateType)
+      )
+      .dropDuplicates
+      .toDF()
+
+    toInsert
       .write
-      .format("delta")
-      .mode(SaveMode.Append)
       .partitionBy("audience")
+      .format("delta")
+      .option("partitionOverwriteMode", "dynamic")
+      .mode(SaveMode.Overwrite)
       .saveAsTable(uri)
   }
+
+  def insertNewAudience(audience: Audience): Unit = insertNewAudience(audience.name, audience.seed)
+
   def deleteAudience(audience: Audience): Unit = {
     val table = DeltaTable.forPath(session, uri)
     table.delete(col("audience").equalTo(audience.name))
   }
-//  need to explore whenNotMatedBy source to set non-null end_Date to represent audience membership removal
-  def merge(audience: Audience): Unit = {
-    val target = DeltaTable.forPath(session, uri)
-    val source = audience.seed
-      .withColumnRenamed(audience.id, "individual_identity_key")
-      .withColumn("audience", lit(audience.name))
-      .withColumn("run_date", current_date())
-      .withColumn(colName = "null_end_date", lit(null))
+//https://kontext.tech/article/1067/spark-dynamic-and-static-partition-overwrite
+  def merge(audience_name: String, dataFrame: DataFrame): Unit = {
+    val updates = dataFrame
+    val prev: DataFrame = readAudience(audience_name).filter(col("end_date").isNotNull)
+      .filter(col("last_published").lt(current_date()))
+      .withColumn("last_published", current_date())
 
-    val merged = target.as("target")
-      .merge(
-        source = source.as("updates"),
-        condition = s"${target_alias}.individual_identity_key = ${source_alias}.${audience.id} AND ${target_alias}.audience = ${source_alias}.audience"
+    val curr: DataFrame = readAudience(audience_name).filter(col("end_date").isNull)
+    val matched_records: DataFrame = curr.as("curr")
+      .join(
+        updates.as("updates"),
+        col("curr.individual_identity_key").equalTo(col("updates.individual_identity_key")),
+        "inner")
+      .select(
+        col("curr.audience").as("audience"),
+        lit(current_date()).as("last_published"),
+        col("curr.individual_identity_key").as("individual_identity_key"),
+        col("curr.start_date").as("start_date"),
+        lit(null).as("end_date").cast(DateType)
       )
-      .whenMatched
-      .updateExpr(
-        Map(
-          "audience" -> s"${target_alias}.audience",
-          "individual_identity_key" -> s"${target_alias}.individual_identity_key",
-          "last_published" -> s"${source_alias}.run_date",
-          "start_date" -> s"${target_alias}.start_date",
-          "end_date" -> s"${source_alias}.null_end_date"
-        ))
-      .whenNotMatched
-      .insertExpr(
-        Map(
-          "audience" -> s"${source_alias}.audience",
-          "individual_identity_key" -> s"${source_alias}.individual_identity_key",
-          "last_published" -> s"${source_alias}.run_date",
-          "start_date" -> s"${source_alias}.run_date",
-          "end_date" -> s"${source_alias}.null_end_date"
-        ))
-    merged.execute()
+
+    val unmatched_to_head: DataFrame = updates.as("updates")
+      .join(
+        curr.as("curr"),
+        col("curr.individual_identity_key").equalTo(col("updates.individual_identity_key")),
+        "leftanti")
+      .select(
+        lit(audience_name).as("audience"),
+        lit(current_date()).as("last_published"),
+        col("updates.individual_identity_key").as("individual_identity_key"),
+        lit(current_date()).as("start_date"),
+        lit(null).as("end_date").cast(DateType)
+      )
+    val unmatched_to_tail: DataFrame = curr.as("curr")
+      .join(
+        updates.as("updates"),
+        col("curr.individual_identity_key").equalTo(col("updates.individual_identity_key")),
+        "leftanti")
+      .select(
+        col("curr.audience").as("audience"),
+        lit(current_date()).as("last_published"),
+        col("curr.individual_identity_key").as("individual_identity_key"),
+        col("curr.start_date").as("start_date"),
+        lit(current_date()).as("end_date")
+      )
+    val scd2: DataFrame = prev
+      .union(unmatched_to_tail)
+      .union(matched_records)
+      .union(unmatched_to_head)
+
+    scd2.write
+      .format("delta")
+      .mode("overwrite")
+      .partitionBy("audience")
+      .option("partitionOverwriteMode", "dynamic")
+      .saveAsTable(uri)
   }
   def read: DataFrame = session.read.table(uri)
+
   def readAudinece(audience: Audience): DataFrame = read.filter(col("audience").equalTo(audience.name))
+
+  def readAudience(audience_name: String): DataFrame = read.filter(col("audience").equalTo(audience_name))
 }
