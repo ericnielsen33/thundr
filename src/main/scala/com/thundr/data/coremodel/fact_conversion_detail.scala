@@ -13,8 +13,10 @@ case object fact_conversion_detail
   override def dimensionalized: DataFrame = this.withAlias
     .join(
       dim_product.dimensionalized,
-      dim_product("sku_id") === this("sku_id"),
+      dim_product("sku_id") .equalTo(this("sku_id")) &&
+      dim_product("brand_id").equalTo((this("brand_id"))),
       "left")
     .drop(dim_product("sku_id"))
+    .drop(dim_product("brand_id"))
     .as(name)
 }
