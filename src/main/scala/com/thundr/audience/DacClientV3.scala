@@ -22,13 +22,15 @@ object DacClientV3
   def postNewAudience(
                        audience_name: String,
                        location: String,
-                       data_sources: List[String] = List.empty
+                       data_sources: List[String] = List.empty,
+                       brands: List[String] = List.empty
                      ): String = {
     val uri: String = s"${root}v3/transfer"
     val entity: Map[String, Object] = Map(
       "name" -> audience_name,
       "location" -> location,
-      "data_sources" -> data_sources
+      "data_sources" -> data_sources,
+      "brands" -> brands
     )
     val json: String = Serialization.write(entity)
     val req = new HttpPost(uri)
@@ -50,6 +52,7 @@ object DacClientV3
     val dacPollResponse: DacPollResponse = DacPollResponse.decode(json)
     dacPollResponse
   }
+
   def refreshExistingAudience(
                                audience_name: String,
                                location: String,
@@ -74,6 +77,14 @@ object DacClientV3
 
   def getBrands() : String = {
     val uri: String = s"${root}/v3/client/brands"
+    val req = new HttpGet(uri)
+    req.addHeader("x-discovery-access-token", dac_api_key)
+    val res = client.execute(req)
+    IOUtils.toString(res.getEntity().getContent(), Charset.defaultCharset())
+  }
+
+  def getDataSources(): String = {
+    val uri: String = s"${root}/v3/datasources"
     val req = new HttpGet(uri)
     req.addHeader("x-discovery-access-token", dac_api_key)
     val res = client.execute(req)
