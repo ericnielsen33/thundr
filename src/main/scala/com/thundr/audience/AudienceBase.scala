@@ -2,7 +2,9 @@ package com.thundr.audience
 
 
 import com.thundr.config.{ConfigProvider, SessionProvider}
-import org.apache.spark.sql.{DataFrame, Column}
+import com.thundr.core.services.audience_catalogue.AudienceCatalogueProvider
+import com.thundr.core.services.audience_lifeycle.AudienceLifecycleProvider
+import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
 abstract class AudienceBase
@@ -35,11 +37,17 @@ abstract class AudienceBase
     ImpAudienceInitialTransferSeeded(newName, unioned)
   }
 
-  def intersection( other: AudienceBase) : AudienceBase = {
+  def intersect(other: AudienceBase) : AudienceBase = {
     val intersected = this.withAlias
-      .join(other.withAlias, this(id_col_alias).equalTo(other(other.id_col_alias)), "inner")
+      .join(other.withAlias, this.id.equalTo(other.id), "inner")
     val newName = this.audience_name + "_Intersection_" + other.audience_name
     ImpAudienceInitialTransferSeeded(newName, intersected)
   }
 
+  def supress(other: AudienceBase): AudienceBase = {
+      val supressed = this.withAlias
+        .join(other.withAlias, this.id.equalTo(other.id), "leftanti")
+      val newName = this.audience_name + "_supression_" + other.audience_name
+      ImpAudienceInitialTransferSeeded(newName, supressed)
+  }
 }

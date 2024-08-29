@@ -1,10 +1,10 @@
-package com.thundr.audience
+package com.thundr.reporting.activation
 
-import org.apache.spark.sql._
-import org.apache.spark.sql.types._
-import org.apache.spark.sql.functions._
 import com.thundr.config.SessionProvider
 import com.thundr.data.public_works._
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
 
 case class  ActivationReport (reportable_audiences: Seq[ActivationReportInputItem])
   extends SessionProvider {

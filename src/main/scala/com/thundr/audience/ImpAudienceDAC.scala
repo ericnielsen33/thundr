@@ -1,7 +1,7 @@
 package com.thundr.audience
 
+import com.thundr.core.services.dac.{DacClientV3 => DacClient}
 import org.apache.spark.sql.DataFrame
-import com.thundr.audience.{DacClientV3 => DacClient }
 
 case class ImpAudienceDAC(name: String, dac_id: String, data_sources: List[String] = List())
   extends AudienceBase {

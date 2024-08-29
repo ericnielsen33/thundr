@@ -1,17 +1,17 @@
 package com.thundr.audience
 
 import com.thundr.config.{ConfigProvider, SessionProvider}
+import com.thundr.core.services.audience_catalogue.AudienceCatalogueProvider
 import org.apache.spark.sql.{Column, DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
-import com.thundr.audience.{DacClientV3 => DacClient }
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
+import com.thundr.core.services.dac.{DacClientV3 => DacClient}
 import com.thundr.data.coremodel.xref_individual_group_id_to_individual
+
 import java.sql.Timestamp
 import org.json4s.jackson.Serialization
 
-//consider having an audience class w/ name only (no df seed) for easy use of many utility methods.
 //consider creating audience manager that can use metadata to manage lifecyle of all audiences.
-//consider creating abstact audience class, then returning subtaypes
-// basted off of adding a seed, creating it, persisting to xfer / activating it.
 
 case class Audience( seed: DataFrame,
                      name: String,

@@ -1,6 +1,6 @@
-package com.thundr.audience
+package com.thundr.core.services.audience_meta
 
-  import java.sql.Timestamp
+import java.sql.Timestamp
 //An audience can be routine or ad-hoc ( category)
 //The program represents the brand (or in the case of PMX) requesting agency
 case class AudienceMetaSchema(

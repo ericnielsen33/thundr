@@ -1,4 +1,4 @@
-package com.thundr.audience
+package com.thundr.core.services.audience_catalogue
 
 import java.sql.Date
 
