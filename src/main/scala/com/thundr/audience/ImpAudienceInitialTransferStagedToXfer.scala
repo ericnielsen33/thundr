@@ -1,7 +1,9 @@
 package com.thundr.audience
 
 import org.apache.spark.sql.DataFrame
-import com.thundr.audience.{DacClientV3 => DacClient }
+import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.dac.{DacClientV3 => DacClient}
+
 import java.sql.Timestamp
 import org.json4s.jackson.Serialization
 

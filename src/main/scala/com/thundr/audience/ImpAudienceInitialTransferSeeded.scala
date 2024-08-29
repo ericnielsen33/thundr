@@ -1,5 +1,7 @@
 package com.thundr.audience
 
+import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 

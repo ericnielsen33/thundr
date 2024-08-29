@@ -1,10 +1,11 @@
 package com.thundr.audience
 
 
+import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
-
 
 
 case class ImpAudienceRefreshSeeded(name: String, seed: DataFrame, dac_id: String, data_sources: List[String] = List())

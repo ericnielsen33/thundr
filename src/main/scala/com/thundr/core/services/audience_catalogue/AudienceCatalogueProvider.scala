@@ -1,10 +1,11 @@
-package com.thundr.audience
+package com.thundr.core.services.audience_catalogue
 
+import com.thundr.audience.Audience
 import com.thundr.config.ConfigProvider
 import io.delta.tables.DeltaTable
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
 class AudienceCatalogueProvider(val session: SparkSession)
   extends Serializable
@@ -34,8 +35,8 @@ class AudienceCatalogueProvider(val session: SparkSession)
       .select(
         col("individual_identity_key"),
         lit(name).as("audience"),
-        current_date().as("last_published"),
-        current_date().as("start_date"),
+        current_date().as("last_published").cast(DateType),
+        current_date().as("start_date").cast(DateType),
         lit(null).as("end_date").cast(DateType)
       )
       .dropDuplicates
@@ -61,7 +62,7 @@ class AudienceCatalogueProvider(val session: SparkSession)
     val updates = dataFrame
     val prev: DataFrame = readAudience(audience_name).filter(col("end_date").isNotNull)
       .filter(col("last_published").lt(current_date()))
-      .withColumn("last_published", current_date())
+      .withColumn("last_published", current_date().cast(DateType))
 
     val curr: DataFrame = readAudience(audience_name).filter(col("end_date").isNull)
     val matched_records: DataFrame = curr.as("curr")
@@ -71,9 +72,9 @@ class AudienceCatalogueProvider(val session: SparkSession)
         "inner")
       .select(
         col("curr.audience").as("audience"),
-        lit(current_date()).as("last_published"),
+        lit(current_date()).as("last_published").cast(DateType),
         col("curr.individual_identity_key").as("individual_identity_key"),
-        col("curr.start_date").as("start_date"),
+        col("curr.start_date").as("start_date").cast(DateType),
         lit(null).as("end_date").cast(DateType)
       )
 
@@ -84,9 +85,9 @@ class AudienceCatalogueProvider(val session: SparkSession)
         "leftanti")
       .select(
         lit(audience_name).as("audience"),
-        lit(current_date()).as("last_published"),
+        lit(current_date()).as("last_published").cast(DateType),
         col("updates.individual_identity_key").as("individual_identity_key"),
-        lit(current_date()).as("start_date"),
+        lit(current_date()).as("start_date").cast(DateType),
         lit(null).as("end_date").cast(DateType)
       )
     val unmatched_to_tail: DataFrame = curr.as("curr")
@@ -96,7 +97,7 @@ class AudienceCatalogueProvider(val session: SparkSession)
         "leftanti")
       .select(
         col("curr.audience").as("audience"),
-        lit(current_date()).as("last_published"),
+        lit(current_date()).as("last_published").cast(DateType),
         col("curr.individual_identity_key").as("individual_identity_key"),
         col("curr.start_date").as("start_date"),
         lit(current_date()).as("end_date")

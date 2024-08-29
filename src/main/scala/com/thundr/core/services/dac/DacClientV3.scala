@@ -1,14 +1,15 @@
-package com.thundr.audience
+package com.thundr.core.services.dac
 
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import org.apache.http.client.methods.{HttpGet, HttpPost, HttpPut}
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.HttpHeaders
-import org.apache.http.entity.StringEntity
+import com.thundr.audience.DacPollResponse
 import org.apache.commons.io.IOUtils
-import org.json4s.jackson.Serialization
+import org.apache.http.HttpHeaders
+import org.apache.http.client.methods.{HttpGet, HttpPost, HttpPut}
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.HttpClientBuilder
 import org.json4s._
+import org.json4s.jackson.Serialization
+
+import java.nio.charset.{Charset, StandardCharsets}
 
 
 object DacClientV3

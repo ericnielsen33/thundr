@@ -1,12 +1,13 @@
-package com.thundr.audience
+package com.thundr.core.services.audience_lifeycle
 
+import com.thundr.audience.Audience
 import com.thundr.config.ConfigProvider
 import io.delta.tables.DeltaTable
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
-import java.sql.Timestamp
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+
+import scala.collection.JavaConverters._
 import scala.collection.mutable._
-import collection.JavaConverters._
 
 
 // consider extending the class with session proivder and changing into an object

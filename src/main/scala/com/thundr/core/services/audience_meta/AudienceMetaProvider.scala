@@ -1,8 +1,8 @@
-package com.thundr.audience
+package com.thundr.core.services.audience_meta
 
 import com.thundr.config.ConfigProvider
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import io.delta.tables.DeltaTable
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
 class AudienceMetaProvider(val session: SparkSession)
   extends Serializable
