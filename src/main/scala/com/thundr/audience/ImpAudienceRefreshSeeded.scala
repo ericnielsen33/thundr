@@ -17,14 +17,14 @@ case class ImpAudienceRefreshSeeded(name: String, seed: DataFrame, dac_id: Strin
 
 //  needs to return a new Audience implementation that is refreshable and Catalogued
 //  Catalogued version my need to be sure to only read the catalogue head
-  def upsertInCatalogue: ImpAudienceInitialTransferCatalogued = {
+  def upsertInCatalogue: ImpAudienceRefreshCatalogued = {
     val event: AudienceLifecycleSchema = AudienceLifecycleSchema(
       name,
       new Timestamp(System.currentTimeMillis()),
       "UPSERT", None, None)
 
     audienceCatalogueProvider.merge(name, seed)
-    ImpAudienceInitialTransferCatalogued(name = name, data_sources = data_sources)
+    ImpAudienceRefreshCatalogued(name = name, dac_id = dac_id, data_sources = data_sources)
   }
 
 }
