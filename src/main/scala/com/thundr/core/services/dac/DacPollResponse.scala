@@ -4,7 +4,18 @@ import org.json4s._
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.{read, write}
 
-case class DacPollResponse(name: String, status: String, dac_id: String, rqs_id: String)
+
+/// add pretty print
+case class DacPollResponse(
+                            name: String,
+                            location: String,
+                            status: String,
+                            dac_id: String,
+                            rqs_id: String,
+                            error_message: String,
+                            brands: List[String],
+                            data_sources: List[String]
+                          )
 
 object DacPollResponse extends Serializable {
   implicit val formats: Formats = Serialization.formats(NoTypeHints)

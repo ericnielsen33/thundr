@@ -16,7 +16,7 @@ case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String
 
   def activateToDiscovery(): ImpAudienceDAC = {
     implicit val formats = org.json4s.DefaultFormats
-    val response: String = DacClient.postNewAudience(name, xfer_location, data_sources)
+    val response: String = DacClient.postNewAudience(name, location, data_sources)
     val decoded = DacPostNewAudienceResponse.decode(response)
     val data: Map[String, String] =  Map("dac_id" -> decoded.dac_id)
     val json: String = Serialization.write(data)
