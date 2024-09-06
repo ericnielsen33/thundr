@@ -8,7 +8,6 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
 import org.json4s._
 import org.json4s.jackson.Serialization
-
 import java.nio.charset.{Charset, StandardCharsets}
 
 

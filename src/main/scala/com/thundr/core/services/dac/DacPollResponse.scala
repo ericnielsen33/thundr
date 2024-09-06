@@ -12,9 +12,9 @@ case class DacPollResponse(
                             status: String,
                             dac_id: String,
                             rqs_id: String,
-                            error_message: String,
-                            brands: List[String],
-                            data_sources: List[String]
+                            error_message: Option[String] = Option(""),
+                            brands: Option[List[String]] = Option(List("")),
+                            data_sources: Option[List[String]] = Option(List(""))
                           )
 
 object DacPollResponse extends Serializable {
