@@ -1,10 +1,11 @@
 package com.thundr.data.coremodel
 
-import com.thundr.data.DataSource
+import com.thundr.data.{DataSource, OnlineID}
 import org.apache.spark.sql.DataFrame
 
 case object fact_site_visit
-  extends DataSource {
+  extends DataSource
+  with OnlineID {
   override def name: String = "fact_site_visit"
 
   override def namespace: String = "coremodel"
