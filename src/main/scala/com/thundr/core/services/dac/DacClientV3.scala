@@ -76,7 +76,7 @@ object DacClientV3
   }
 
   def getBrands() : String = {
-    val uri: String = s"${root}/v3/client/brands"
+    val uri: String = s"${root}v3/client/brands"
     val req = new HttpGet(uri)
     req.addHeader("x-discovery-access-token", dac_api_key)
     val res = client.execute(req)
@@ -84,7 +84,7 @@ object DacClientV3
   }
 
   def getDataSources(): String = {
-    val uri: String = s"${root}/v3/datasources"
+    val uri: String = s"${root}v3/datasources"
     val req = new HttpGet(uri)
     req.addHeader("x-discovery-access-token", dac_api_key)
     val res = client.execute(req)
