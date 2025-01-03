@@ -3,6 +3,7 @@ package com.thundr.audience
 import java.sql.Timestamp
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions.col
+import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
 
@@ -18,7 +19,7 @@ case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sourc
   override def audience_name: String = name
 
   def persistXfer: ImpAudienceRefreshStagedToXfer = {
-    implicit val formats = org.json4s.DefaultFormats
+    implicit val formats: DefaultFormats = DefaultFormats
     val data: Map[String, String] =  Map("xfer_location" -> xfer_location)
     val json: String = Serialization.write(data)
 
@@ -47,5 +48,6 @@ case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sourc
     )
   }
 
+  def delete() : ImpAudienceRefreshSeeded = ???
 
 }

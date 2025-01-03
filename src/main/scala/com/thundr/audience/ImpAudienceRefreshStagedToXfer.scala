@@ -35,4 +35,6 @@ case class ImpAudienceRefreshStagedToXfer(name: String, location: String, dac_id
     ImpAudienceDAC(name, decoded.dac_id, data_sources)
   }
 
+  def delete() : ImpAudienceRefreshCatalogued = ???
+
 }
