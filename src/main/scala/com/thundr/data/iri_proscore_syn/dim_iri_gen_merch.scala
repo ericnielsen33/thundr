@@ -6,7 +6,7 @@ case object dim_iri_gen_merch
 
   override def name: String = "dim_iri_gen_merch"
 
-  override def namespace: String = "samba"
+  override def namespace: String = "iri_proscore_syn"
 
   override def prefix: String = default_prefix
 

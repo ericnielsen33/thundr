@@ -4,8 +4,8 @@ import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions.col
 import org.json4s.jackson.Serialization
-
 import java.sql.Timestamp
+
 
 case class ImpAudienceInitialTransferCatalogued(name: String, data_sources: List[String] = List())
   extends AudienceBase {
@@ -45,4 +45,6 @@ case class ImpAudienceInitialTransferCatalogued(name: String, data_sources: List
 
     ImpAudienceInitialTransferStagedToXfer(name = name, location = xfer_location , data_sources = data_sources)
   }
+
+  def delete(): ImpAudienceInitialTransferSeeded = ???
 }

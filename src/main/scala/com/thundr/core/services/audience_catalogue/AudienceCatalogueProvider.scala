@@ -61,10 +61,22 @@ class AudienceCatalogueProvider(val session: SparkSession)
   def merge(audience_name: String, dataFrame: DataFrame): Unit = {
     val updates = dataFrame
     val prev: DataFrame = readAudience(audience_name).filter(col("end_date").isNotNull)
-      .filter(col("last_published").lt(current_date()))
-      .withColumn("last_published", current_date().cast(DateType))
+      .select(
+        col("audience"),
+        col("individual_identity_key"),
+        col("start_date"),
+        col("end_date")
+      )
+
 
     val curr: DataFrame = readAudience(audience_name).filter(col("end_date").isNull)
+      .select(
+        col("audience"),
+        col("individual_identity_key"),
+        col("start_date"),
+        col("end_date")
+      )
+
     val matched_records: DataFrame = curr.as("curr")
       .join(
         updates.as("updates"),
@@ -72,7 +84,6 @@ class AudienceCatalogueProvider(val session: SparkSession)
         "inner")
       .select(
         col("curr.audience").as("audience"),
-        lit(current_date()).as("last_published").cast(DateType),
         col("curr.individual_identity_key").as("individual_identity_key"),
         col("curr.start_date").as("start_date").cast(DateType),
         lit(null).as("end_date").cast(DateType)
@@ -85,7 +96,6 @@ class AudienceCatalogueProvider(val session: SparkSession)
         "leftanti")
       .select(
         lit(audience_name).as("audience"),
-        lit(current_date()).as("last_published").cast(DateType),
         col("updates.individual_identity_key").as("individual_identity_key"),
         lit(current_date()).as("start_date").cast(DateType),
         lit(null).as("end_date").cast(DateType)
@@ -97,15 +107,15 @@ class AudienceCatalogueProvider(val session: SparkSession)
         "leftanti")
       .select(
         col("curr.audience").as("audience"),
-        lit(current_date()).as("last_published").cast(DateType),
         col("curr.individual_identity_key").as("individual_identity_key"),
-        col("curr.start_date").as("start_date"),
-        lit(current_date()).as("end_date")
+        col("curr.start_date").as("start_date").cast(DateType),
+        lit(current_date()).as("end_date").cast(DateType)
       )
     val scd2: DataFrame = prev
       .union(unmatched_to_tail)
       .union(matched_records)
       .union(unmatched_to_head)
+      .withColumn("last_published", lit(current_date()).cast(DateType))
 
     scd2.write
       .format("delta")
