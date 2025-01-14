@@ -1,4 +1,5 @@
 import com.thundr.util.MeasurementCalendar
+import com.thundr.core.enums.JobStages
 
 import java.time.{LocalDate, DayOfWeek, Period}
 import com.thundr.data.coremodel.fact_conversion_detail
@@ -18,6 +19,6 @@ object Playground extends App {
     .find(_.getDayOfWeek.equals(DayOfWeek.MONDAY))
     .get
 
-  println(fact_conversion_detail.individual_identity_key)
+  println(JobStages.EXECUTE_JOB)
 
 }

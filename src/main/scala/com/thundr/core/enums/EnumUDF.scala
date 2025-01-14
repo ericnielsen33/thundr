@@ -9,6 +9,5 @@ trait EnumUDF {
   this: EnumUDFMapable =>
 
   def matchEnum: String => UserDefinedFunction = ???
-  )
 
 }
