@@ -3,6 +3,7 @@ package com.thundr.core.enums
 object AudienceEvents {
   sealed trait AudienceEvent {
     def name: String = this.getClass.getName
+    override def toString: String = name
   }
 
   case object CREATE_AUDIENCE extends AudienceEvent

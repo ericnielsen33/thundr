@@ -4,6 +4,7 @@ package com.thundr.core.enums
 object  CampaignGoals {
   sealed trait CampaignGoal {
     def name: String = this.getClass.getName
+    override def toString: String = name
   }
 
   case object BRAND_AWARENESS extends CampaignGoal

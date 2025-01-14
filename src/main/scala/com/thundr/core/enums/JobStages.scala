@@ -4,6 +4,7 @@ object JobStages
   extends EnumUDFMapable {
   sealed trait JobStage {
     def name: String = this.getClass.getName
+    override def toString: String = name
   }
 
   case object JOB_START extends JobStage

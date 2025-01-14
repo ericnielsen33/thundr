@@ -15,8 +15,7 @@ case class ImpAudienceRefreshSeeded(name: String, seed: DataFrame, dac_id: Strin
 
   override def read: DataFrame = seed
 
-//  needs to return a new Audience implementation that is refreshable and Catalogued
-//  Catalogued version my need to be sure to only read the catalogue head
+
   def upsertInCatalogue: ImpAudienceRefreshCatalogued = {
     val event: AudienceLifecycleSchema = AudienceLifecycleSchema(
       name,
@@ -24,6 +23,7 @@ case class ImpAudienceRefreshSeeded(name: String, seed: DataFrame, dac_id: Strin
       "UPSERT", None, None)
 
     audienceCatalogueProvider.merge(name, seed)
+    audienceLifecycleProvider.append(event)
     ImpAudienceRefreshCatalogued(name = name, dac_id = dac_id, data_sources = data_sources)
   }
 
