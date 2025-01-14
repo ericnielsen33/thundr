@@ -17,7 +17,7 @@ case class ImpAudienceRefreshStagedToXfer(name: String, location: String, dac_id
 //  need to decode response and decide if more should be added into json field
   def refreshInDiscovery(): ImpAudienceDAC = {
     implicit val formats = org.json4s.DefaultFormats
-    val response: String = DacClient.refreshExistingAudience(name, location, dac_id, data_sources)
+    val response: String = DacClient.refreshExistingAudience(location, dac_id, data_sources)
     val decoded = DacPostNewAudienceResponse.decode(response)
     val data: Map[String, String] =  Map("dac_id" -> decoded.dac_id)
     val json: String = Serialization.write(data)
