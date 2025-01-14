@@ -68,7 +68,6 @@ class AudienceCatalogueProvider(val session: SparkSession)
         col("end_date")
       )
 
-
     val curr: DataFrame = readAudience(audience_name).filter(col("end_date").isNull)
       .select(
         col("audience"),
