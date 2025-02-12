@@ -1,9 +1,10 @@
 package com.thundr.audience
 
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions.col
 import org.json4s.jackson.Serialization
+
 import java.sql.Timestamp
 
 
@@ -41,7 +42,7 @@ case class ImpAudienceInitialTransferCatalogued(name: String, data_sources: List
       .option("headers", "true")
       .saveAsTable(xfer_location)
 
-    audienceLifecycleProvider.append(event)
+    AudienceLifecycleProvider.append(event)
 
     ImpAudienceInitialTransferStagedToXfer(name = name, location = xfer_location , data_sources = data_sources)
   }

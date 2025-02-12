@@ -3,7 +3,6 @@ package com.thundr.audience
 
 import com.thundr.config.{ConfigProvider, SessionProvider}
 import com.thundr.core.services.audience_catalogue.AudienceCatalogueProvider
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleProvider
 import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
@@ -11,7 +10,6 @@ abstract class AudienceBase
   extends SessionProvider with ConfigProvider {
 
   def audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session)
-  def audienceLifecycleProvider: AudienceLifecycleProvider = new AudienceLifecycleProvider(session)
   def audienceStatusProvider: AudienceStatusProvider = new AudienceStatusProvider(session)
 
   def apply(colName: String): Column = col(s"$audience_name.$colName")

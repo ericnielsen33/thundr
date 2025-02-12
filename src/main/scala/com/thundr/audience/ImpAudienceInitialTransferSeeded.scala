@@ -1,6 +1,6 @@
 package com.thundr.audience
 
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
@@ -20,7 +20,7 @@ import org.apache.spark.sql.DataFrame
     "CREATE", None, None)
 
    audienceCatalogueProvider.insertNewAudience(name, seed)
-   audienceLifecycleProvider.append(event)
+   AudienceLifecycleProvider.append(event)
    ImpAudienceInitialTransferCatalogued(name, data_sources = data_sources )
   }
 

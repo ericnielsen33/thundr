@@ -3,7 +3,7 @@ package com.thundr.core.services.dac
 import com.thundr.audience.DacPollResponse
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpHeaders
-import org.apache.http.client.methods.{HttpGet, HttpPost, HttpPut}
+import org.apache.http.client.methods.{ HttpRequestBase,  HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
 import org.json4s._

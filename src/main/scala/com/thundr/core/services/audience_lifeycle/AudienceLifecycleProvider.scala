@@ -1,20 +1,16 @@
 package com.thundr.core.services.audience_lifeycle
 
-import com.thundr.audience.Audience
-import com.thundr.config.ConfigProvider
+import com.thundr.config.{ConfigProvider, SessionProvider}
 import io.delta.tables.DeltaTable
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable._
 
-
-// consider extending the class with session proivder and changing into an object
-
-class AudienceLifecycleProvider(val session: SparkSession)
+object AudienceLifecycleProvider
  extends Serializable
- with ConfigProvider {
+ with ConfigProvider
+ with SessionProvider {
   def uri: String = s"${customer_prefix}.public_works.fact_lifecyle_event"
   def read: DataFrame = session.read.table(uri)
   def append(event: AudienceLifecycleSchema) = {
@@ -25,10 +21,10 @@ class AudienceLifecycleProvider(val session: SparkSession)
       .mode(SaveMode.Append)
       .saveAsTable(uri)
   }
-  def getHistory(audience: Audience): Seq[AudienceLifecycleSchema] = {
+  def getHistory(audience_name: String): Seq[AudienceLifecycleSchema] = {
     import session.implicits._
     this.read.as[AudienceLifecycleSchema]
-      .filter(col("name").equalTo(audience.name))
+      .filter(col("name").equalTo(audience_name))
       .collectAsList()
       .asScala
       .sortWith(_.timestamp.toInstant.toEpochMilli < _.timestamp.toInstant.toEpochMilli)
