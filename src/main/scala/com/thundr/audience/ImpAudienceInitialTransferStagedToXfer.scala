@@ -2,10 +2,11 @@ package com.thundr.audience
 
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 import com.thundr.core.services.dac.{DacClientV3 => DacClient}
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
+
 
 case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String, data_sources: List[String] = List())
   extends AudienceBase {
@@ -27,7 +28,7 @@ case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String
       None,
       Option(json)
     )
-    audienceLifecycleProvider.append(event)
+    AudienceLifecycleProvider.append(event)
 
     ImpAudienceDAC(name, decoded.dac_id, data_sources)
   }

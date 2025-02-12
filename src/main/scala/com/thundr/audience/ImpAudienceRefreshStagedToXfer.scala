@@ -1,7 +1,7 @@
 package com.thundr.audience
 
 import org.apache.spark.sql.DataFrame
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 import com.thundr.core.services.dac.{DacClientV3 => DacClient}
 
 import java.sql.Timestamp
@@ -30,7 +30,7 @@ case class ImpAudienceRefreshStagedToXfer(name: String, location: String, dac_id
       Option(json)
     )
 
-    audienceLifecycleProvider.append(event)
+    AudienceLifecycleProvider.append(event)
 
     ImpAudienceDAC(name, decoded.dac_id, data_sources)
   }

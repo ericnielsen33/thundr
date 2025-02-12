@@ -6,7 +6,7 @@ import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions.col
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 
 case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sources: List[String] = List())
   extends AudienceBase {
@@ -45,7 +45,7 @@ case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sourc
       .option("headers", "true")
       .saveAsTable(xfer_location)
 
-    audienceLifecycleProvider.append(event)
+    AudienceLifecycleProvider.append(event)
 
     ImpAudienceRefreshStagedToXfer(
       name = audience_name,
