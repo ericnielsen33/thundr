@@ -14,7 +14,5 @@ trait Job[T] {
     val arg_mapping = collectArgs(args)
 
     execute(arg_mapping.get)
-
   }
-
 }

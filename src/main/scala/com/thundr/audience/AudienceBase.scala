@@ -16,7 +16,7 @@ abstract class AudienceBase
 
   def xfer_location: String = s"${customer_prefix}.audience_xfer.${audience_name.toLowerCase()}".trim()
 
-  def xfer_path: String = s"${audeince_xfer_root}/${audience_name}.csv".trim()
+  def xfer_path: String = s"${audeince_xfer_root}${audience_name}.csv".trim()
 
   def id_col_alias: String = "individual_identity_key"
 
