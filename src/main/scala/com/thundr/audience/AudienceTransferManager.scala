@@ -28,8 +28,8 @@ object AudienceTransferManager
 
   val fact_audience_member_table_ref = s"$customer_prefix.audience_xfer.ad_alchemy_audience_member_scd1"
   val fact_job_request_table_ref = s"$customer_prefix.audience_xfer.ad_alchemy_job_requests"
-  val fact_job_fulfillments_table_ref = s"$customer_prefix.public_works.fact_job_fulfillments"
-  val fact_lifecyle_event_table_ref = s"$customer_prefix.public_works.ad_alchemy_job_fulfillments"
+  val fact_job_fulfillments_table_ref = s"$customer_prefix.audience_xfer.ad_alchemy_job_fulfillments"
+  val fact_lifecyle_event_table_ref = s"$customer_prefix.public_works.fact_lifecyle_event"
 
   val fact_audience_member = session.table(fact_audience_member_table_ref)
   val fact_job_request = session.table(fact_job_request_table_ref)

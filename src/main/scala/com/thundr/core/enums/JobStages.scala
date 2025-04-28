@@ -1,11 +1,14 @@
 package com.thundr.core.enums
 
+sealed trait JobStage {
+  def name: String = this.getClass.getName
+  override def toString: String = name
+}
+
+
 object JobStages
-  extends EnumUDFMapable {
-  sealed trait JobStage {
-    def name: String = this.getClass.getName
-    override def toString: String = name
-  }
+  extends EnumUDFMapable[JobStage] {
+
 
   case object JOB_START extends JobStage
   case object COLLECT_ARGS extends  JobStage
@@ -15,7 +18,7 @@ object JobStages
   case object CLEAN_UP extends JobStage
   case object JOB_FINISHED extends JobStage
 
-  def values: Seq[Serializable] = { Seq.empty :+
+  def values: Seq[JobStage] = { Seq.empty :+
     JOB_START :+
     COLLECT_ARGS :+
     VALIDATE_ARGS :+
