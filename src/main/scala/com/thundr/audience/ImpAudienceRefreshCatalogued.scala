@@ -8,7 +8,7 @@ import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 
-case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sources: List[String] = List())
+case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def read: DataFrame = {

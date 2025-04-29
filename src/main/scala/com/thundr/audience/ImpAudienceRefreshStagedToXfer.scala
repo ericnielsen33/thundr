@@ -7,7 +7,7 @@ import com.thundr.core.services.dac.{DacClientV3 => DacClient}
 import java.sql.Timestamp
 import org.json4s.jackson.Serialization
 
-case class ImpAudienceRefreshStagedToXfer(name: String, location: String, dac_id: String, data_sources: List[String] = List())
+case class ImpAudienceRefreshStagedToXfer(name: String, location: String, dac_id: String, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def read: DataFrame = session.read.table(location)

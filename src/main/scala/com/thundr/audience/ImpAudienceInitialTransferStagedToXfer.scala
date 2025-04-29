@@ -8,7 +8,7 @@ import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 
 
-case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String, data_sources: List[String] = List())
+case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def read: DataFrame = session.read.table(location)

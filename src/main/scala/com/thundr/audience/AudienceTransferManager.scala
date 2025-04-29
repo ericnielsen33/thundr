@@ -36,21 +36,19 @@ object AudienceTransferManager
   val fact_job_fulfillments = session.table(fact_job_fulfillments_table_ref)
   val fact_lifecyle_event = session.table(fact_lifecyle_event_table_ref)
 
-  override def collectArgs(args: Array[String]): Try[AudienceTransferManagerConfig] =
-    Try {
-      val parsed = ArgParser.parse(args)
+  override def collectArgs(args: Array[String]): Try[AudienceTransferManagerConfig] = Try {
 
-      parsed.keys.foreach {
-        key => println(s"${key}: ${parsed(key)}")
-      }
+        val parsed = ArgParser.parse(args)
 
-      val config = AudienceTransferManagerConfig(
-        parsed("job_id"),
-        parsed("job_name"),
-        parsed("run_id"),
-        parsed("run_dt"),
-        parsed("transfer_limit_per_run").toInt
-      )
+        parsed.keys.foreach { key => println(s"${key}: ${parsed(key)}") }
+
+        val config = AudienceTransferManagerConfig(
+          parsed("job_id"),
+          parsed("job_name"),
+          parsed("run_id"),
+          parsed("run_dt"),
+          parsed("transfer_limit_per_run").toInt
+        )
       config
     }
 
@@ -97,18 +95,18 @@ object AudienceTransferManager
         col("transfer_requests.audience_id").equalTo(col("audience_catalog_params.audience_id")),
         "inner")
       .select(
-        col("transfer_requests.job_request_id"),
-        col("transfer_requests.job_name"),
-        col("transfer_requests.audience_id"),
-        coalesce(col("transfer_requests.name"), col("audience_catalog_params.name")).as("name"),
+        col("transfer_requests.job_request_id").as("job_request_id"),
+        col("transfer_requests.job_name").as("job_name"),
+        col("transfer_requests.audience_id").as("audience_id"),
+        coalesce(col("transfer_requests.name"), col("audience_catalog_params.audience_name")).as("name"),
         col("transfer_requests.data_sources").as("data_sources")
       )
-
-      val refreshable_audiences = fact_lifecyle_event
-          .filter(col("event").equalTo("TRANSFER_OK"))
-          .as("fact_lifecyle_event")
-          .select(col("name"))
-          .distinct
+//
+//      val refreshable_audiences = fact_lifecyle_event
+//          .filter(col("event").equalTo("TRANSFER_OK"))
+//          .as("fact_lifecyle_event")
+//          .select(col("name"))
+//          .distinct
 
     val pending_transfers_seq: Seq[DacInitialTransferSpec] = pending_transfers_df
       .as[DacInitialTransferSpec]
@@ -120,7 +118,7 @@ object AudienceTransferManager
 
   def transfer_audiences(config: AudienceTransferManagerConfig, specs: Seq[DacInitialTransferSpec]): List[ImpAudienceDAC] = {
 
-    import  session.implicits._
+    import session.implicits._
 
     val transfers: ListBuffer[ImpAudienceDAC] = ListBuffer[ImpAudienceDAC]()
 
@@ -176,7 +174,7 @@ object AudienceTransferManager
     statuses.toList
   }
 
-  override def execute(args: AudienceTransferManagerConfig): Try[Unit] = Try {
+  override def execute(args: AudienceTransferManagerConfig): Unit =  {
 
     println(s"${current_time_lazy} | STAGE START | Collect pending transfers\n")
     val pending_transfers = collectPendingTransfers(args)
@@ -185,8 +183,9 @@ object AudienceTransferManager
     val transfers = transfer_audiences(args, pending_transfers)
     println(s"${current_time_lazy} | STAGE FINISH | Execute Transfers \n")
     println(s"${current_time_lazy} | STAGE START | Poll Audience Status \n")
-    poll_transfer_status(transfers)
-    println(s"${current_time_lazy} | STAGE FINISH | Poll Audience Status \n")
+    val statuses = poll_transfer_status(transfers)
 
+    statuses.foreach(_.prettyPrint)
+    println(s"${current_time_lazy} | STAGE FINISH | Poll Audience Status \n")
   }
 }

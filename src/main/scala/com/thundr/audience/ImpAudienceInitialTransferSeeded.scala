@@ -7,7 +7,7 @@ import org.apache.spark.sql.DataFrame
 
 
 //consider making data sources mandatory
- case class ImpAudienceInitialTransferSeeded(name: String, seed: DataFrame, data_sources: List[String] = List())
+ case class ImpAudienceInitialTransferSeeded(name: String, seed: DataFrame, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def read: DataFrame = seed

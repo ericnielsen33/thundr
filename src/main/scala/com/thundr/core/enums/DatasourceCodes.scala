@@ -1,13 +1,13 @@
 package com.thundr.core.enums
 
+sealed trait DatasourceCode {
+  def name: String = this.getClass.getName
+  override def toString: String = name
+}
+
+
 object DatasourceCodes
-  extends EnumUDFMapable {
-
-  sealed trait DatasourceCode {
-    def name: String = this.getClass.getName
-
-    override def toString: String = name
-  }
+  extends EnumUDFMapable[DatasourceCode] {
 
   case object E_TSP extends DatasourceCode
   case object E_TSP_DEMO extends  DatasourceCode
@@ -54,7 +54,7 @@ object DatasourceCodes
     override def name: String = "3_SAMBA"
   }
 
-  def values: Seq[Serializable] = { Seq.empty :+
+  def values: Seq[DatasourceCode] = { Seq.empty :+
     E_TSP :+
     E_TSP_DEMO :+
     E_TSP_AUTO :+

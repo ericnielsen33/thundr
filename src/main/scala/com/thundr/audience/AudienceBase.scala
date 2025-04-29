@@ -7,7 +7,8 @@ import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
 abstract class AudienceBase
-  extends SessionProvider with ConfigProvider {
+  extends SessionProvider
+    with ConfigProvider {
 
   def audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session)
   def audienceStatusProvider: AudienceStatusProvider = new AudienceStatusProvider(session)

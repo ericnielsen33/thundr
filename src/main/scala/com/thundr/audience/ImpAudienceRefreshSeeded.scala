@@ -6,7 +6,7 @@ import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, Au
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 
-case class ImpAudienceRefreshSeeded(name: String, seed: DataFrame, dac_id: String, data_sources: List[String] = List())
+case class ImpAudienceRefreshSeeded(name: String, seed: DataFrame, dac_id: String, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def audience_name: String = name

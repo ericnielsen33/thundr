@@ -10,7 +10,7 @@ abstract class CoreDataService[T]
   type S <: Dataset[T]
 
   def catalogue: String = customer_prefix
-  def schema: String = "public_works"
+  def schema: String
   def table_name: String
   def uri: String = s"$catalogue.$schema.$table_name"
   def read: S
@@ -18,5 +18,4 @@ abstract class CoreDataService[T]
   def overwrite: CoreDataService[T]
   def append: CoreDataService[T]
   def delete: CoreDataService[T]
-
 }

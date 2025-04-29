@@ -9,7 +9,7 @@ import org.json4s.jackson.Serialization
 
 
 
-case class ImpAudienceInitialTransferCatalogued(name: String, data_sources: List[String] = List())
+case class ImpAudienceInitialTransferCatalogued(name: String, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
 //  need to ensure audiences have a null end date in the catalogue.

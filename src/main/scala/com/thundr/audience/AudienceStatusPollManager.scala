@@ -70,7 +70,7 @@ object AudienceStatusPollManager
     }
   }
 
-  override def execute(args: AudienceStatusPollManagerConfig): Try[Unit] = Try {
+  override def execute(args: AudienceStatusPollManagerConfig): Unit =  {
 
     println(s"${current_time_lazy} | STAGE START | Polling unfihsined polls\n")
     pollUnfinishedPolls

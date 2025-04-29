@@ -6,13 +6,13 @@ import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, Au
 import org.apache.spark.sql.functions._
 import org.json4s.jackson.Serialization
 
-case class ImpAudienceInitialTransferSCD1Catalogued(name: String, audience_id: String, data_sources: List[String])
+case class ImpAudienceInitialTransferSCD1Catalogued(name: String, audience_id: String, data_sources: List[String], brands: List[String] = List())
   extends AudienceBase {
 
 
-  val fact_audience_member_table_ref = s"$customer_prefix.audience_xfer.fact_audience_member"
+  val fact_audience_member_table_ref = s"$customer_prefix.audience_xfer.ad_alchemy_audience_member_scd1"
 
-  override def xfer_location: String = s"${customer_prefix}.audience_xfer.xfer_manager_${audience_id}".trim()
+  override def xfer_location: String = s"${customer_prefix}.audience_xfer.adalchemy_${audience_id}".trim().toLowerCase
 
   override def read: DataFrame = session.table(fact_audience_member_table_ref)
     .filter(col("audience_id").equalTo(audience_id))
