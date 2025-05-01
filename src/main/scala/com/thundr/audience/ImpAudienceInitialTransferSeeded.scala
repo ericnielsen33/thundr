@@ -1,12 +1,10 @@
 package com.thundr.audience
 
-import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
-
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
+import com.thundr.core.services.audience_lifeycle._
 
 
-//consider making data sources mandatory
  case class ImpAudienceInitialTransferSeeded(name: String, seed: DataFrame, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
@@ -33,6 +31,6 @@ import org.apache.spark.sql.DataFrame
     "UPSERT", None, None)
 
    audienceCatalogueProvider.merge(name, seed)
-   ImpAudienceInitialTransferCatalogued(name = name, data_sources = data_sources)
+   ImpAudienceInitialTransferCatalogued(name = name, data_sources = data_sources, brands = brands)
   }
 }

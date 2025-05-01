@@ -7,24 +7,22 @@ import scala.util.Try
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
 import com.thundr.config.{ConfigProvider, SessionProvider}
-import com.thundr.util.ArgParser
+import com.thundr.util.{ArgParser, ConsoleLogger}
 import com.thundr.core.Job
+import com.thundr.core.enums.JobStages.{PARAM_READ, STAGE_END, STAGE_START, TASK_END}
 
 
-case class DacInitialTransferSpec(job_request_id: Long, job_name: String, audience_id: String, name: String, data_sources: List[String])
+case class DacInitialTransferSpec(job_request_id: Long, job_name: String, audience_id: String, name: String, data_sources: List[String], brands: List[String])
 
 case class JobRequestFulfillment(job_request_id: Long, completed_at: Timestamp, job_name: String, job_id: String, run_id: String)
 
 object AudienceTransferManager
   extends Job[AudienceTransferManagerConfig]
   with SessionProvider
-  with ConfigProvider {
+  with ConfigProvider
+  with ConsoleLogger {
 
-  lazy val current_time_lazy: Timestamp = {
-    val timezone: ZoneId = ZoneId.of("America/Los_Angeles")
-    val now: Instant = ZonedDateTime.now(timezone).toInstant
-    Timestamp.from(now)
-  }
+  val timezone: ZoneId = ZoneId.of("America/Los_Angeles")
 
   val fact_audience_member_table_ref = s"$customer_prefix.audience_xfer.ad_alchemy_audience_member_scd1"
   val fact_job_request_table_ref = s"$customer_prefix.audience_xfer.ad_alchemy_job_requests"
@@ -40,7 +38,7 @@ object AudienceTransferManager
 
         val parsed = ArgParser.parse(args)
 
-        parsed.keys.foreach { key => println(s"${key}: ${parsed(key)}") }
+        parsed.keys.foreach { key => log(PARAM_READ, key, parsed(key)) }
 
         val config = AudienceTransferManagerConfig(
           parsed("job_id"),
@@ -70,6 +68,11 @@ object AudienceTransferManager
         col("requested_by_email")
       )
 
+    val refreshable_audiences = fact_lifecyle_event
+      .filter(col("event").equalTo("TRANSFER_OK"))
+      .select(col("name"))
+      .distinct
+
     val pending_transfers_df: DataFrame = fact_job_request
       .filter(col("job_name").equalTo("TRANSFER_NEW_AUDIENCE"))
       .select(
@@ -78,7 +81,8 @@ object AudienceTransferManager
         col("requested_at"),
         col("audience_id"),
         col("request_params.transfer_params.name").as("name"),
-        col("request_params.transfer_params.data_sources").as("data_sources")
+        col("request_params.transfer_params.data_sources").as("data_sources"),
+        col("request_params.transfer_params.brands").as("brands")
       )
       .as("transfer_requests")
       .join(
@@ -94,19 +98,19 @@ object AudienceTransferManager
         audience_catalog_params.as("audience_catalog_params"),
         col("transfer_requests.audience_id").equalTo(col("audience_catalog_params.audience_id")),
         "inner")
+      .join(
+        refreshable_audiences.as("refreshable_audiences"),
+        coalesce(col("transfer_requests.name"), col("audience_catalog_params.audience_name")).equalTo(col("refreshable_audiences.name")),
+        "leftanti"
+      )
       .select(
         col("transfer_requests.job_request_id").as("job_request_id"),
         col("transfer_requests.job_name").as("job_name"),
         col("transfer_requests.audience_id").as("audience_id"),
         coalesce(col("transfer_requests.name"), col("audience_catalog_params.audience_name")).as("name"),
-        col("transfer_requests.data_sources").as("data_sources")
+        col("transfer_requests.data_sources").as("data_sources"),
+        col("transfer_requests.brands").as("brands")
       )
-//
-//      val refreshable_audiences = fact_lifecyle_event
-//          .filter(col("event").equalTo("TRANSFER_OK"))
-//          .as("fact_lifecyle_event")
-//          .select(col("name"))
-//          .distinct
 
     val pending_transfers_seq: Seq[DacInitialTransferSpec] = pending_transfers_df
       .as[DacInitialTransferSpec]
@@ -136,13 +140,15 @@ object AudienceTransferManager
           .persistXfer
           .activateToDiscovery
 
-      println(s"${current_time_lazy} | TASK COMPLETE | Transfer for job_request_id: ${spec.job_request_id} \n")
+      log(TASK_END, "Transfer for job_request_id:", ${spec.job_request_id.toString})
 
         transfers.append(transfer)
 
+        val fulfillmnent_time =  Timestamp.from(ZonedDateTime.now(timezone).toInstant)
+
         val fulfillment = JobRequestFulfillment(
           spec.job_request_id,
-          current_time_lazy,
+          fulfillmnent_time,
           spec.job_name,
           config.job_id,
           config.run_id
@@ -156,7 +162,7 @@ object AudienceTransferManager
           .mode(SaveMode.Append)
           .saveAsTable(fact_job_fulfillments_table_ref)
 
-      println(s"${current_time_lazy} | TASK COMPLETE | Write fulfillment for job_request_id: ${spec.job_request_id} \n")
+      log(TASK_END, "Write fulfillment for job_request_id:", ${spec.job_request_id.toString})
       }
 
   transfers.toList
@@ -169,23 +175,23 @@ object AudienceTransferManager
       val status: DacPollResponse = transfer.pollStatus
       statuses.append(status)
       println(status.prettyPrint)
-      println(s"${current_time_lazy} | TASK COMPLETE | Poll DAC status for audience_name: ${transfer.audience_name} \n")
+
+      log(TASK_END, "Poll DAC status for audience_name:", ${transfer.audience_name})
     }
     statuses.toList
   }
 
   override def execute(args: AudienceTransferManagerConfig): Unit =  {
 
-    println(s"${current_time_lazy} | STAGE START | Collect pending transfers\n")
+    log(STAGE_START, "COLLECTING", "PENDING_TRANSFERS")
     val pending_transfers = collectPendingTransfers(args)
-    println(s"${current_time_lazy} | STAGE FINISH | Collect pending transfers\n")
-    println(s"${current_time_lazy} | STAGE START | Execute Transfers \n")
+    log(STAGE_END, "COLLECTING", "PENDING_TRANSFERS")
+    log(STAGE_START, "EXECUTING", "DAC TRANSFERS")
     val transfers = transfer_audiences(args, pending_transfers)
-    println(s"${current_time_lazy} | STAGE FINISH | Execute Transfers \n")
-    println(s"${current_time_lazy} | STAGE START | Poll Audience Status \n")
+    log(STAGE_END, "EXECUTING", "DAC TRANSFERS")
+    log(STAGE_START, "POLLING", "DAC API")
     val statuses = poll_transfer_status(transfers)
-
     statuses.foreach(_.prettyPrint)
-    println(s"${current_time_lazy} | STAGE FINISH | Poll Audience Status \n")
+    log(STAGE_END, "POLLING", "DAC API")
   }
 }

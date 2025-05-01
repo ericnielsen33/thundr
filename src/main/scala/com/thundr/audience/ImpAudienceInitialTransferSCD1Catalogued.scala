@@ -45,7 +45,7 @@ case class ImpAudienceInitialTransferSCD1Catalogued(name: String, audience_id: S
 
     AudienceLifecycleProvider.append(event)
 
-    ImpAudienceInitialTransferStagedToXfer(name = name, location = xfer_location , data_sources = data_sources)
+    ImpAudienceInitialTransferStagedToXfer(name = name, location = xfer_location , data_sources = data_sources, brands = brands)
   }
 
   def delete(): ImpAudienceInitialTransferSeeded = ???

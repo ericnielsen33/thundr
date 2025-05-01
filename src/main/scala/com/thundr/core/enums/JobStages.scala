@@ -1,7 +1,7 @@
 package com.thundr.core.enums
 
 sealed trait JobStage {
-  def name: String = this.getClass.getName
+  def name: String = this.getClass.getSimpleName.replace("$", "")
   override def toString: String = name
 }
 
