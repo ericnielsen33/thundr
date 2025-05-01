@@ -140,7 +140,7 @@ object AudienceTransferManager
           .persistXfer
           .activateToDiscovery
 
-      log(TASK_END, "Transfer for job_request_id:", ${spec.job_request_id.toString})
+      log(TASK_END, "Transfer for job_request_id:", spec.job_request_id.toString)
 
         transfers.append(transfer)
 
@@ -162,7 +162,7 @@ object AudienceTransferManager
           .mode(SaveMode.Append)
           .saveAsTable(fact_job_fulfillments_table_ref)
 
-      log(TASK_END, "Write fulfillment for job_request_id:", ${spec.job_request_id.toString})
+      log(TASK_END, "Write fulfillment for job_request_id:", spec.job_request_id.toString)
       }
 
   transfers.toList
@@ -176,7 +176,7 @@ object AudienceTransferManager
       statuses.append(status)
       println(status.prettyPrint)
 
-      log(TASK_END, "Poll DAC status for audience_name:", ${transfer.audience_name})
+      log(TASK_END, "Poll DAC status for audience_name:", transfer.audience_name)
     }
     statuses.toList
   }
