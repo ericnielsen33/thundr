@@ -1,7 +1,7 @@
 import java.time.LocalDate
 
-val project_major_version = "0.5"
-val dbr_runtime = "14.3"
+val project_major_version = "0.6"
+val dbr_runtime = "15.4"
 lazy val date = LocalDate.now().toString
 
 ThisBuild / version :=  s"$project_major_version-DBR$dbr_runtime-SNAPSHOT$date"
@@ -26,8 +26,9 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
   "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
   "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
+//  "org.mlflow" %% "mlflow-spark" % "2.9.1" % "provided",
   "org.apache.httpcomponents" % "httpclient" % "4.5.14" % "provided",
   "org.apache.httpcomponents" % "httpcore" % "4.4.16" % "provided",
   "io.delta" %% "delta-spark" % "3.2.0" % "provided",
-  "org.json4s" %% "json4s-core" % "3.7.0-M11",
+  "org.json4s" %% "json4s-core" % "3.7.0-M11"
   )
