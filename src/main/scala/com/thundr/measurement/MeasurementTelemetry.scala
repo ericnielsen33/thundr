@@ -9,6 +9,6 @@ import java.time.LocalDate
 // What attribution window should we use given the purchase cycle?
 // What is the longest purchase cycle that would be accepatble for this analysis?
 // What does the poison distribution of time from ad to purchase look like?
-class MeasurementTelemetry (sku_group: SKUGroup, campaign_start: LocalDate){
-
-}
+//class MeasurementTelemetry (sku_group: ProductCollection, campaign_start: LocalDate){
+//
+//}

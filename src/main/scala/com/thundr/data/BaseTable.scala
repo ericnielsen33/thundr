@@ -26,4 +26,8 @@ abstract class BaseTable
 
     session.read.table(uri).limit(10)
   }
+
+  def drop(): Unit = {
+    this.session.sql(s"DROP TABLE IF EXISTS ${this.uri};")
+  }
 }

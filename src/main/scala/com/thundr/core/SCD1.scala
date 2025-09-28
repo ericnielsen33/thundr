@@ -33,21 +33,21 @@ trait SCD1 {
 
   def historical_entities(entity: String,  date: LocalDate): DataFrame = all_entities(entity).filter(date_col.equalTo(date))
 
-  overdef append(entity: String, updates: DataFrame) = {
-
-    val archive_date = LocalDate.now()
-
-    val current_to_historic: DataFrame = current_entities()
-
-
-    val historic = historical_entities(entity)
-
-    val current_entities = updates.withColumn(date_col_ref, lit(null).cast(DateType))
-
-    val all_entities = current_to_historic
-      .
-
-  }
+//  overdef append(entity: String, updates: DataFrame) = {
+//
+//    val archive_date = LocalDate.now()
+//
+//    val current_to_historic: DataFrame = current_entities()
+//
+//
+//    val historic = historical_entities(entity)
+//
+//    val current_entities = updates.withColumn(date_col_ref, lit(null).cast(DateType))
+//
+//    val all_entities = current_to_historic
+//      .
+//
+//  }
 
 
 }

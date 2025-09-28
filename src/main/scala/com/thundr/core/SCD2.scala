@@ -15,7 +15,7 @@ trait SCD2 {
 
   def lookup_col: Column = col(lookup_key)
 
-  def parition_key_ref: String
+  def parition_key_ref: String = lookup_key
 
   def partition_col: Column = col(parition_key_ref)
 
