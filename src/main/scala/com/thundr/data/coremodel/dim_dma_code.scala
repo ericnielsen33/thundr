@@ -8,4 +8,5 @@ case object dim_dma_code
   override def namespace: String = "coremodel"
 
   override def prefix: String = default_prefix
+
 }

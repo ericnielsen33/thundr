@@ -3,7 +3,7 @@ package com.thundr.core.services.dac
 import com.thundr.audience.DacPollResponse
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpHeaders
-import org.apache.http.client.methods.{HttpGet, HttpPost, HttpPut}
+import org.apache.http.client.methods.{HttpRequestBase,  HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
 import org.json4s._
@@ -54,14 +54,12 @@ object DacClientV3
   }
 
   def refreshExistingAudience(
-                               audience_name: String,
                                location: String,
                                dac_id: String,
                                data_sources: List[String] = List.empty
                              ): String = {
     val uri: String = s"${root}v3/transfer"
     val entity: Map[String, Object] = Map(
-      "name" -> audience_name,
       "location" -> location,
       "dac_id" -> dac_id,
       "data_sources" -> data_sources

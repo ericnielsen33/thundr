@@ -3,22 +3,21 @@ package com.thundr.audience
 
 import com.thundr.config.{ConfigProvider, SessionProvider}
 import com.thundr.core.services.audience_catalogue.AudienceCatalogueProvider
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleProvider
 import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
 abstract class AudienceBase
-  extends SessionProvider with ConfigProvider {
+  extends SessionProvider
+    with ConfigProvider {
 
   def audienceCatalogueProvider: AudienceCatalogueProvider = new AudienceCatalogueProvider(session)
-  def audienceLifecycleProvider: AudienceLifecycleProvider = new AudienceLifecycleProvider(session)
   def audienceStatusProvider: AudienceStatusProvider = new AudienceStatusProvider(session)
 
   def apply(colName: String): Column = col(s"$audience_name.$colName")
 
   def xfer_location: String = s"${customer_prefix}.audience_xfer.${audience_name.toLowerCase()}".trim()
 
-  def xfer_path: String = s"${audeince_xfer_root}/${audience_name}.csv".trim()
+  def xfer_path: String = s"${audeince_xfer_root}${audience_name}.csv".trim()
 
   def id_col_alias: String = "individual_identity_key"
 

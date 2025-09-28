@@ -2,12 +2,13 @@ package com.thundr.audience
 
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 import com.thundr.core.services.dac.{DacClientV3 => DacClient}
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 
-case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String, data_sources: List[String] = List())
+
+case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def read: DataFrame = session.read.table(location)
@@ -16,7 +17,7 @@ case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String
 
   def activateToDiscovery(): ImpAudienceDAC = {
     implicit val formats: DefaultFormats = DefaultFormats
-    val response: String = DacClient.postNewAudience(name, location, data_sources)
+    val response: String = DacClient.postNewAudience(name, location, data_sources, brands)
     val decoded = DacPostNewAudienceResponse.decode(response)
     val data: Map[String, String] =  Map("dac_id" -> decoded.dac_id)
     val json: String = Serialization.write(data)
@@ -27,7 +28,7 @@ case class ImpAudienceInitialTransferStagedToXfer(name: String, location: String
       None,
       Option(json)
     )
-    audienceLifecycleProvider.append(event)
+    AudienceLifecycleProvider.append(event)
 
     ImpAudienceDAC(name, decoded.dac_id, data_sources)
   }

@@ -1,33 +1,30 @@
 package com.thundr.audience
 
 import java.sql.Timestamp
-import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 import org.apache.spark.sql.{DataFrame, SaveMode}
-import org.apache.spark.sql.functions.col
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
+import org.apache.spark.sql.functions._
 import org.json4s.jackson.Serialization
 
-
-
-
-case class ImpAudienceInitialTransferCatalogued(name: String, data_sources: List[String] = List(), brands: List[String] = List())
+case class ImpAudienceInitialTransferSCD1Catalogued(name: String, audience_id: String, data_sources: List[String], brands: List[String] = List())
   extends AudienceBase {
 
-//  need to ensure audiences have a null end date in the catalogue.
-//  might be best to wipe the tables to start?
-  override def read: DataFrame = {
-    val all_time: DataFrame = audienceCatalogueProvider.readAudience(name)
-    val curr: DataFrame = all_time.filter(col("end_date").isNull)
-    curr
-  }
+
+  val fact_audience_member_table_ref = s"$customer_prefix.audience_xfer.ad_alchemy_audience_member_scd1"
+
+  override def xfer_location: String = s"${customer_prefix}.audience_xfer.adalchemy_${audience_id}".trim().toLowerCase
+
+  override def read: DataFrame = session.table(fact_audience_member_table_ref)
+    .filter(col("audience_id").equalTo(audience_id))
 
   override def audience_name: String = name
-
 
   def persistXfer: ImpAudienceInitialTransferStagedToXfer = {
     implicit val formats = org.json4s.DefaultFormats
     val data: Map[String, String] =  Map(
       "xfer_location" -> xfer_location,
-      "data_sources"-> data_sources.toString()
+      "audience_id" -> audience_id,
+      "data_sources" -> data_sources.toString()
     )
     val json: String = Serialization.write(data)
 
@@ -52,4 +49,5 @@ case class ImpAudienceInitialTransferCatalogued(name: String, data_sources: List
   }
 
   def delete(): ImpAudienceInitialTransferSeeded = ???
+
 }

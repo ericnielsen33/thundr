@@ -1,4 +1,4 @@
-package com.thundr.util
+package com.thundr.measurement
 
 import java.time.{DayOfWeek, LocalDate, ZoneId}
 
@@ -6,6 +6,7 @@ case class EncodedDate(date: LocalDate)
 case class MeasurementCalendar(start_date: LocalDate, end_date: LocalDate, dates: Seq[LocalDate] = Seq()) {
 
   private val zoneId = ZoneId.systemDefault()
+
   def duration_days: Long = end_date.toEpochDay() - start_date.toEpochDay()
 
   def with_daily_calendar: MeasurementCalendar = {

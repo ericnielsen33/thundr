@@ -14,17 +14,17 @@ class AudienceStatusProvider(val session: SparkSession)
   with ConfigProvider {
   def uri: String = s"${customer_prefix}.public_works.fact_dac_poll_status"
   def read: DataFrame = session.read.table(uri)
-  def getHistory(audience: Audience): Seq[AudienceStatusSchema] = {
+  def getHistory(audience_name: String): Seq[AudienceStatusSchema] = {
     import session.implicits._
     this.read.as[AudienceStatusSchema]
-      .filter(col("name").equalTo(audience.name))
+      .filter(col("name").equalTo(audience_name))
       .collectAsList()
       .asScala
       .sortWith(_.timestamp.toInstant.toEpochMilli < _.timestamp.toInstant.toEpochMilli)
   }
 
-  def getCurrentStatus(audience: Audience) = {
-    getHistory(audience).reverse.head
+  def getCurrentStatus(audience_name: String) = {
+    getHistory(audience_name).reverse.head
   }
 
   def append(poll: DacPollResponse) = {

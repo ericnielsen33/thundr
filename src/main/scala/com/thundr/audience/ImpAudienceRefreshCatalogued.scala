@@ -1,13 +1,14 @@
 package com.thundr.audience
 
 import java.sql.Timestamp
+import java.time.LocalDate
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions.col
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
+import com.thundr.core.services.audience_lifeycle.{AudienceLifecycleProvider, AudienceLifecycleSchema}
 
-case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sources: List[String] = List())
+case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def read: DataFrame = {
@@ -18,7 +19,7 @@ case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sourc
 
   override def audience_name: String = name
 
-  def persistXfer: ImpAudienceRefreshStagedToXfer = {
+  def persistXfer(end_date: LocalDate = null): ImpAudienceRefreshStagedToXfer = {
     implicit val formats: DefaultFormats = DefaultFormats
     val data: Map[String, String] =  Map("xfer_location" -> xfer_location)
     val json: String = Serialization.write(data)
@@ -30,7 +31,13 @@ case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sourc
       None,
       Option(json))
 
-    this.read.select(col("individual_identity_key")).distinct()
+    val audienceDF = this.read
+      .filter(col("audience").equalTo(audience_name))
+      .filter(col("end_date").eqNullSafe(end_date))
+      .select(col("individual_identity_key"))
+      .distinct()
+
+    audienceDF
       .write
       .mode(SaveMode.Overwrite)
       .format("csv")
@@ -38,10 +45,10 @@ case class ImpAudienceRefreshCatalogued(name: String, dac_id: String, data_sourc
       .option("headers", "true")
       .saveAsTable(xfer_location)
 
-    audienceLifecycleProvider.append(event)
+    AudienceLifecycleProvider.append(event)
 
     ImpAudienceRefreshStagedToXfer(
-      name = name,
+      name = audience_name,
       location = xfer_location,
       dac_id = dac_id,
       data_sources = data_sources
