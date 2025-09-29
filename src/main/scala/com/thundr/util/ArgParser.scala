@@ -1,11 +1,11 @@
 package com.thundr.util
 
-case class ArgParser(input: Array[String], mapping: Map[String, String] = Map()) {
-  def parse(args: Array[String]): ArgParser = {
+object ArgParser{
+  def parse(args: Array[String]): Map[String, String] = {
     val argMapping = args
       .map {_.split("=")}
-      .map {case Array(k, v) => k.toLowerCase().replace("--", "") -> v}
+      .map {case Array(k, v) => k.trim.toLowerCase().replace("--", "") -> v.trim}
       .toMap
-    ArgParser(args, argMapping)
+    argMapping
   }
 }

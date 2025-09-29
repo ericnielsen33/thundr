@@ -1,11 +1,11 @@
 package com.thundr.audience
 
-import com.thundr.core.services.audience_lifeycle.AudienceLifecycleSchema
-
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
+import com.thundr.core.services.audience_lifeycle._
 
- case class ImpAudienceInitialTransferSeeded(name: String, seed: DataFrame, data_sources: List[String] = List())
+
+ case class ImpAudienceInitialTransferSeeded(name: String, seed: DataFrame, data_sources: List[String] = List(), brands: List[String] = List())
   extends AudienceBase {
 
   override def read: DataFrame = seed
@@ -20,8 +20,8 @@ import org.apache.spark.sql.DataFrame
     "CREATE", None, None)
 
    audienceCatalogueProvider.insertNewAudience(name, seed)
-   audienceLifecycleProvider.append(event)
-   ImpAudienceInitialTransferCatalogued(name, data_sources = data_sources )
+   AudienceLifecycleProvider.append(event)
+   ImpAudienceInitialTransferCatalogued(name, data_sources = data_sources)
   }
 
   def upsertInCatalogue: ImpAudienceInitialTransferCatalogued = {
@@ -31,6 +31,6 @@ import org.apache.spark.sql.DataFrame
     "UPSERT", None, None)
 
    audienceCatalogueProvider.merge(name, seed)
-   ImpAudienceInitialTransferCatalogued(name = name, data_sources = data_sources)
+   ImpAudienceInitialTransferCatalogued(name = name, data_sources = data_sources, brands = brands)
   }
 }

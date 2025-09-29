@@ -1,14 +1,33 @@
 package com.thundr.data
 
-import io.delta.tables.DeltaTable
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SaveMode}
 
 abstract class BaseTable
  extends DataSource {
-  def create(): DeltaTable
-  def overwrite(df: DataFrame): DeltaTable
 
-  def append(df: DataFrame): DeltaTable
+  def create: DataFrame
 
+  def overwrite(df: DataFrame): DataFrame = {
 
+    df.write
+      .format("delta")
+      .mode(SaveMode.Overwrite)
+      .saveAsTable(uri)
+
+    session.read.table(uri).limit(10)
+  }
+
+  def append(df: DataFrame): DataFrame = {
+
+    df.write
+      .format("delta")
+      .mode(SaveMode.Append)
+      .saveAsTable(uri)
+
+    session.read.table(uri).limit(10)
+  }
+
+  def drop(): Unit = {
+    this.session.sql(s"DROP TABLE IF EXISTS ${this.uri};")
+  }
 }

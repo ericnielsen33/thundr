@@ -1,6 +1,5 @@
 package com.thundr.core.services.audience_catalogue
 
-import com.thundr.audience.Audience
 import com.thundr.config.ConfigProvider
 import io.delta.tables.DeltaTable
 import org.apache.spark.sql.functions._
@@ -51,11 +50,9 @@ class AudienceCatalogueProvider(val session: SparkSession)
       .saveAsTable(uri)
   }
 
-  def insertNewAudience(audience: Audience): Unit = insertNewAudience(audience.name, audience.seed)
-
-  def deleteAudience(audience: Audience): Unit = {
+  def deleteAudience(audience_name: String): Unit = {
     val table = DeltaTable.forPath(session, uri)
-    table.delete(col("audience").equalTo(audience.name))
+    table.delete(col("audience").equalTo(audience_name))
   }
 //https://kontext.tech/article/1067/spark-dynamic-and-static-partition-overwrite
   def merge(audience_name: String, dataFrame: DataFrame): Unit = {
@@ -67,7 +64,6 @@ class AudienceCatalogueProvider(val session: SparkSession)
         col("start_date"),
         col("end_date")
       )
-
 
     val curr: DataFrame = readAudience(audience_name).filter(col("end_date").isNull)
       .select(
@@ -126,7 +122,5 @@ class AudienceCatalogueProvider(val session: SparkSession)
   }
   def read: DataFrame = session.read.table(uri)
 
-  def readAudinece(audience: Audience): DataFrame = read.filter(col("audience").equalTo(audience.name))
-
-  def readAudience(audience_name: String): DataFrame = read.filter(col("audience").equalTo(audience_name))
+    def readAudience(audience_name: String): DataFrame = read.filter(col("audience").equalTo(audience_name))
 }
