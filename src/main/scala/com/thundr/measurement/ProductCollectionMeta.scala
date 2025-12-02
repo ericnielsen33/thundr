@@ -2,7 +2,9 @@ package com.thundr.measurement
 
 import java.time.LocalDate
 import java.util.UUID
-import org.apache.spark.sql.{ DataFrame }
+import io.delta.tables._
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
 import com.thundr.data._
 
 
@@ -49,7 +51,7 @@ case object ProductCollectionMeta
       s"""
          |ALTER TABLE ${this.uri}
          |ADD CONSTRAINT ${this.name}_collection_type_enum_constraint
-         |CHECK (collection_type IN ('OWN_BRAND', 'COMPETITOR'))
+         |CHECK (collection_type IN ('OWN_BRAND', 'BRAND_HALO', 'CATEGORY'))
          |;
          |""".stripMargin
     )
@@ -76,6 +78,50 @@ case object ProductCollectionMeta
       last_updated = today
     )
     this.append(meta)
+  }
+
+  def read_collection(collection_id: String): DataFrame = this.read.filter(col("collection_id").equalTo(lit(collection_id)))
+
+  def delete_collection(collection_id: String) = {
+    val deltaTable = DeltaTable.forName(session, this.uri)
+    deltaTable.delete(col("collection_id") === collection_id)
+  }
+
+  def update_collection(collection: ProductCollectionMetaSchema) = {
+    import  session.implicits._
+    val deltaTable = DeltaTable.forName(session, this.uri)
+    val updates_df = Seq(collection).toDF()
+
+    deltaTable.as("target")
+      .merge(
+        updates_df.as("updates"),
+        "target.id = updates.id")
+      .whenMatched()
+      .update(
+        Map(
+          "collection_id" -> col("target.collection_id"),
+          "collection_name" -> col("updates.collection_name"),
+          "brand_ref" -> col("updates.brand_ref"),
+          "conversion_table_ref" -> col("updates.conversion_table_ref"),
+          "dimension_table_ref" -> col("updates.dimension_table_ref"),
+          "collection_type" -> col("updates.collection_type"),
+          "insert_date" -> col("target.insert_date"),
+          "last_updated" -> current_date()))
+      .whenNotMatched()
+      .insert(
+        Map(
+          "collection_id" -> col("updates.collection_id"),
+          "collection_name" -> col("updates.collection_name"),
+          "brand_ref" -> col("updates.brand_ref"),
+          "conversion_table_ref" -> col("updates.conversion_table_ref"),
+          "dimension_table_ref" -> col("updates.dimension_table_ref"),
+          "collection_type" -> col("updates.collection_type"),
+          "insert_date" -> current_date(),
+          "last_updated" -> current_date())
+      )
+      .execute()
+
+
   }
 
 }
