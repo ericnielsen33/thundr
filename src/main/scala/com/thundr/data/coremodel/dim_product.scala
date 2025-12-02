@@ -1,9 +1,10 @@
 package com.thundr.data.coremodel
 
-import com.thundr.data.DataSource
+import com.thundr.data.{DataSource, JSONColumn}
 
 case object dim_product
-  extends DataSource {
+  extends DataSource
+  with JSONColumn {
   override def name: String = "dim_product"
 
   override def namespace: String = "coremodel"

@@ -7,6 +7,7 @@ package object geo {
 
   private val EARTH_RADIUS_KM: Double = 6378.14
   private val EARTH_RADIUS_MILES: Double = 3963.19
+
   private def haversine(origin_lat: Column, origin_lon: Column, dest_lat: Column, dest_lon: Column, earth_radius: Double): Column = {
     def helper = {
       pow(sin(radians(dest_lat - origin_lat) / 2), 2) +
