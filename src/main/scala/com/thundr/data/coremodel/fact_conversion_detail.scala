@@ -1,11 +1,12 @@
 package com.thundr.data.coremodel
 
-import com.thundr.data.{CoreID, DataSource}
+import com.thundr.data.{CoreID, DataSource, JSONColumn}
 import org.apache.spark.sql.DataFrame
 
 case object fact_conversion_detail
   extends DataSource
-  with CoreID {
+  with CoreID
+  with JSONColumn {
   override def name: String = "fact_conversion_detail"
   override def namespace: String = "coremodel"
   override def prefix: String = customer_prefix

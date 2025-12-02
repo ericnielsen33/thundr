@@ -2,12 +2,13 @@ package com.thundr.measurement
 
 import java.time.LocalDate
 import java.util.UUID
+import io.delta.tables._
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
 import com.thundr.data._
 import com.thundr.core.SCD2
 
-case object ProductCollection
+case object   ProductCollection
   extends BaseTable
     with SCD2 with public_works.PublicWorksDataset {
 
@@ -41,15 +42,19 @@ case object ProductCollection
     this.read.limit(10)
   }
 
-  def insert_new_collenction(products: DataFrame): DataFrame = {
-    val today: LocalDate = LocalDate.now()
-    val collection_id: String = UUID.randomUUID().toString
+  def read_collection(collection_id: String): DataFrame = read.filter(col("collection_id").equalTo(lit(collection_id)))
+
+  def insert_new_collenction(
+                              products: DataFrame,
+                              collection_id: String = UUID.randomUUID().toString,
+                              insert_date: LocalDate = LocalDate.now()
+                            ): DataFrame = {
     val insert_df = products
       .select(
         lit(collection_id).as("collection_id"),
         col("brand_id"),
         col("sku_id"),
-        lit(today).as(start_col_ref),
+        lit(insert_date).as(start_col_ref),
         lit(null).as(end_col_ref)
       )
 
@@ -59,5 +64,10 @@ case object ProductCollection
       .saveAsTable(uri)
 
     current_entities(lit(collection_id))
+  }
+
+  def delete_collection(collection_id: String) = {
+    val deltaTable = DeltaTable.forName(session, this.uri)
+    deltaTable.delete(col("collection_id") === collection_id)
   }
 }
