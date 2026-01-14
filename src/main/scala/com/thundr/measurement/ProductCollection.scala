@@ -18,7 +18,7 @@ case object   ProductCollection
 
   override def lookup_key: String = "collection_id"
 
-  override def merge_keys: Seq[String] = Seq.empty :+ "lookup_brand_id" :+ "sku_id"
+  override def merge_keys: Seq[String] = Seq.empty :+ "brand_id" :+ "sku_id"
 
   override def create: DataFrame = {
     session.sql(
@@ -33,13 +33,20 @@ case object   ProductCollection
         |                    PRIMARY KEY (collection_id, brand_id, sku_id, start_date)
         |            ) USING DELTA
         |;
-        |ALTER TABLE ${this.uri}
-        |ADD CONSTRAINT ${this.name}_foreign_key_constraint
-        |FOREIGN KEY(collection_id) REFERENCES ${ProductCollectionMeta.uri}
-        |;
         |""".stripMargin
     )
     this.read.limit(10)
+  }
+
+  def add_constraints(): Unit = {
+    session.sql(
+      s"""
+         |ALTER TABLE ${this.uri}
+         |ADD CONSTRAINT ${this.name}_foreign_key_constraint
+         |FOREIGN KEY(collection_id) REFERENCES ${ProductCollectionMeta.uri}
+         |;
+         |""".stripMargin
+    )
   }
 
   def read_collection(collection_id: String): DataFrame = read.filter(col("collection_id").equalTo(lit(collection_id)))

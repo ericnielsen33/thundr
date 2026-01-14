@@ -3,6 +3,8 @@ package com.thundr.measurement
 
 import java.time.LocalDate
 import java.util.UUID
+import io.delta.tables._
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.DataFrame
 import com.thundr.data._
 import com.thundr.data.public_works.PublicWorksDataset
@@ -49,7 +51,6 @@ case object ImpressionGroupMeta
     this.append(df)
   }
 
-
   def insert_new(group_name: String, brand_ref:String, base_table_ref: String): DataFrame = {
 
     val today: LocalDate = LocalDate.now()
@@ -64,6 +65,10 @@ case object ImpressionGroupMeta
       last_updated = today
     )
     this.append(meta)
-    
+  }
+
+  def delete_group(group_id: String) = {
+    val deltaTable = DeltaTable.forName(session, this.uri)
+    deltaTable.delete(col("group_id") === group_id)
   }
 }
