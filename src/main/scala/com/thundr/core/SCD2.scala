@@ -15,6 +15,8 @@ trait SCD2 {
 
   def lookup_col: Column = col(lookup_key)
 
+  def lookup_col(alais: String): Column = col(s"${alais}.${lookup_key}")
+
   def parition_key_ref: String = lookup_key
 
   def partition_col: Column = col(parition_key_ref)
@@ -22,6 +24,8 @@ trait SCD2 {
   def merge_keys: Seq[String]
 
   def merge_columns: Seq[Column] = merge_keys.map{ elem => col(elem).as(elem)}
+
+  def merge_columns(alais: String) = merge_keys.map(elem => col(s"${alais}.${elem}").as(elem))
 
   def start_col_ref: String = "start_date"
 
@@ -57,11 +61,11 @@ trait SCD2 {
         updates.as("updates"),
         merge_keys
           .map{ key => col(s"updates.${key}").equalTo(col(s"current_entities.${key}"))}
-          .reduceLeft{ _ || _ },
+          .reduceLeft{ _ && _ },
         "inner")
       .select({
-          (Seq.empty :+ lookup_col) ++
-            merge_columns :+
+          (Seq.empty :+ lookup_val.as(lookup_key)) ++
+            merge_columns("current_entities") :+
             start_col("current_entities") :+
             end_col(lit(null))
         }: _*)
@@ -73,11 +77,11 @@ trait SCD2 {
         current_entities(lookup_val).as("current_entities"),
         merge_keys
           .map{ key => col(s"updates.${key}").equalTo(col(s"current_entities.${key}"))}
-          .reduceLeft{ _ || _ },
+          .reduceLeft{ _ && _ },
         "leftanti")
       .select({
-          (Seq.empty :+ lookup_col) ++
-            merge_columns :+
+          (Seq.empty :+ lookup_val.as(lookup_key)) ++
+            merge_columns("updates") :+
             start_col(current_date()) :+
             end_col(lit(null))
         }: _*)
@@ -89,11 +93,11 @@ trait SCD2 {
         updates.as("updates"),
         merge_keys
           .map{ key => col(s"updates.${key}").equalTo(col(s"current_entities.${key}"))}
-          .reduceLeft{ _ || _ },
+          .reduceLeft{ _ && _ },
         "leftanti")
       .select({
-          (Seq.empty :+ lookup_col) ++
-            merge_columns :+
+          (Seq.empty :+ lookup_val.as(lookup_key)) ++
+            merge_columns("current_entities") :+
             start_col("current_entities") :+
             end_col(current_date())
         }: _*)

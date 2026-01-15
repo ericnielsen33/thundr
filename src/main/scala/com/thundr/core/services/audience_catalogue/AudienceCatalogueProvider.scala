@@ -54,7 +54,7 @@ class AudienceCatalogueProvider(val session: SparkSession)
     val table = DeltaTable.forPath(session, uri)
     table.delete(col("audience").equalTo(audience_name))
   }
-//https://kontext.tech/article/1067/spark-dynamic-and-static-partition-overwrite
+
   def merge(audience_name: String, dataFrame: DataFrame): Unit = {
     val updates = dataFrame
     val prev: DataFrame = readAudience(audience_name).filter(col("end_date").isNotNull)
@@ -120,7 +120,8 @@ class AudienceCatalogueProvider(val session: SparkSession)
       .option("partitionOverwriteMode", "dynamic")
       .saveAsTable(uri)
   }
+
   def read: DataFrame = session.read.table(uri)
 
-    def readAudience(audience_name: String): DataFrame = read.filter(col("audience").equalTo(audience_name))
+  def readAudience(audience_name: String): DataFrame = read.filter(col("audience").equalTo(audience_name))
 }
