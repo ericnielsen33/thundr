@@ -3,6 +3,7 @@ package com.thundr.measurement
 
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
+import io.delta.tables._
 import com.thundr.data._
 import com.thundr.data.public_works.PublicWorksDataset
 
@@ -19,14 +20,13 @@ case object ConversionFeed
     session.sql(
       s"""
          |CREATE OR REPLACE TABLE ${this.uri} (
-         |                feed_id STRING NOT NULL,
+         |                hh_id STRING NOT NULL,
          |                collection_id STRING NOT NULL,
-         |                individual_identity_key STRING NOT NULL,
-         |                household_id STRING,
+         |                sku_id STRING NOT NULL,
+         |                order_date DATE NOT NULL,
          |                report_dimensions MAP<STRING, STRING>,
-         |                purchase_date DATE NOT NULL,
-         |                unit_count INT NOT NULL,
-         |                revenue DOUBLE NOT NULL
+         |                purchased_product_total_cnt INT NOT NULL,
+         |                purchased_product_total_usd DOUBLE NOT NULL
          |            ) USING DELTA
          |""".stripMargin
     )

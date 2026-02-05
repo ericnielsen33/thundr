@@ -64,7 +64,7 @@ case object ImpressionGroupMeta
       insert_date = today,
       last_updated = today
     )
-    this.append(meta)
+    this.append(meta).filter(col("group_id").equalTo(lit(group_id)))
   }
 
   def delete_group(group_id: String) = {

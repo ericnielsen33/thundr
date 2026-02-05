@@ -22,7 +22,7 @@ object ImpressionGroup
          |CREATE OR REPLACE TABLE ${this.uri} (
          |                group_id STRING NOT NULL,
          |                impression_date DATE NOT NULL,
-         |                user_identity_key STRING NOT NULL,
+         |                user_identity_key STRING NOT NULL,e
          |                user_identity_type_id INT NOT NULL,
          |                report_dimensions MAP<STRING, STRING>,
          |                impression_count INT NOT NULL,
