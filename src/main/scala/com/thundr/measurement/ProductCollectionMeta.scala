@@ -95,7 +95,7 @@ case object ProductCollectionMeta
     deltaTable.as("target")
       .merge(
         updates_df.as("updates"),
-        "target.id = updates.id")
+        "target.collection_id = updates.collection_id")
       .whenMatched()
       .update(
         Map(

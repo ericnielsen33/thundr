@@ -7,7 +7,7 @@ import com.thundr.data._
 import com.thundr.data.public_works.PublicWorksDataset
 
 
-object ImpressionGroup
+case object ImpressionGroup
   extends BaseTable with PublicWorksDataset {
 
   def partition_keys: Seq[String] = Seq.empty :+ "group_id" :+ "impression_date"

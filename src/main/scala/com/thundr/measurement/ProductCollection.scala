@@ -8,7 +8,7 @@ import org.apache.spark.sql.functions._
 import com.thundr.data._
 import com.thundr.core.SCD2
 
-case object   ProductCollection
+case object  ProductCollection
   extends BaseTable
     with SCD2 with public_works.PublicWorksDataset {
 
@@ -63,7 +63,7 @@ case object   ProductCollection
         col("sku_id"),
         lit(insert_date).as(start_col_ref),
         lit(null).as(end_col_ref)
-      )
+      ).dropDuplicates()
 
     insert_df.write
       .format("delta")

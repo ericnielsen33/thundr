@@ -17,4 +17,7 @@ package object vector {
   }
 
   val cosine_similarity: UserDefinedFunction = udf((v1: Vector, v2: Vector) => cosineSimilarity(v1, v2))
+
+  val extract_value_from_vector: Int => UserDefinedFunction = (index: Int) => udf((v: Vector) => v(index))
+
 }

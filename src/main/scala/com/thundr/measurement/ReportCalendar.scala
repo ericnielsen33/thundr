@@ -1,8 +1,7 @@
 package com.thundr.measurement
 
-import java.time.{DayOfWeek, LocalDate, Period, ZoneId }
-import java.time.DayOfWeek._
-import java.time.temporal.{ChronoUnit, TemporalAdjusters }
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.sql.Date
 import org.apache.spark.sql.DataFrame
 import com.thundr.config.SessionProvider
@@ -14,9 +13,7 @@ case class CalendarSchema(period_start: LocalDate, period_end: LocalDate)
 abstract class ReportCalendar(start_date: LocalDate, end_date: LocalDate)
   extends SessionProvider {
 
-  def getReportDates: Seq[LocalDate]
-
-  def getAllDates: Seq[LocalDate] = {
+  def getReportDates: Seq[LocalDate] = {
     Iterator.iterate(start_date)(_.plusDays(1))
       .takeWhile(!_.isAfter(end_date))
       .toSeq
@@ -28,30 +25,10 @@ abstract class ReportCalendar(start_date: LocalDate, end_date: LocalDate)
   }
 
   def duration_days: Long = ChronoUnit.DAYS.between(start_date, end_date)
-
 }
 
-case class WeeklyCalendar(start_date: LocalDate, end_date: LocalDate, report_date_splits: Int)
+case class WeeklyCalendar(start_date: LocalDate, end_date: LocalDate, report_date_splits: Int = 1)
   extends ReportCalendar(start_date: LocalDate, end_date: LocalDate) {
-
-  val week_cycle: Map[DayOfWeek, DayOfWeek] = {
-    Map(
-      MONDAY -> TUESDAY,
-      TUESDAY -> WEDNESDAY,
-      WEDNESDAY -> THURSDAY,
-      THURSDAY -> FRIDAY,
-      FRIDAY -> SATURDAY,
-      SATURDAY -> SUNDAY,
-      SUNDAY -> MONDAY
-    )
-  }
-
-  def getPeriodEnd(localDate: LocalDate) = {
-    val period_start_dow: DayOfWeek = localDate.getDayOfWeek
-    val period_end_dow: DayOfWeek = week_cycle.find(_._2.equals(period_start_dow)).get._1
-    val period_end = localDate.`with`(TemporalAdjusters.nextOrSame(period_end_dow))
-    period_end
-  }
 
   override def getReportDates: Seq[LocalDate] = {
     Iterator.iterate(start_date)(_.plusWeeks(report_date_splits))
@@ -60,9 +37,15 @@ case class WeeklyCalendar(start_date: LocalDate, end_date: LocalDate, report_dat
   }
 
   def getCalendar: Seq[CalendarSchema] = {
-    getReportDates.map { date =>
-      CalendarSchema(date, getPeriodEnd(date))
-    }
+
+    val report_dates: Seq[LocalDate] = Iterator.iterate(start_date)(_.plusWeeks(report_date_splits))
+      .takeWhile(!_.isAfter(end_date.plusWeeks(report_date_splits)))
+      .toSeq
+
+    val report_objects: Seq[CalendarSchema] = {0 to report_dates.length - 2}
+      .map(idx => CalendarSchema(report_dates(idx), report_dates(idx + 1).minusDays(1)))
+
+    report_objects
   }
 
   def getCalendarDF: DataFrame = {
@@ -73,12 +56,12 @@ case class WeeklyCalendar(start_date: LocalDate, end_date: LocalDate, report_dat
 
 object WeeklyCalendar {
 
-  def apply(end_date: LocalDate, report_date_splits: Int, retrospective_units: Int): WeeklyCalendar = {
+  def apply(report_date_splits: Int, retrospective_units: Int, end_date: LocalDate): WeeklyCalendar = {
     val start_date = end_date.minusWeeks(report_date_splits * retrospective_units)
     WeeklyCalendar(start_date, end_date, report_date_splits)
   }
 
-  def apply(report_date_splits: Int, prospective_units: Int, start_date: LocalDate): WeeklyCalendar = {
+  def apply(start_date: LocalDate, report_date_splits: Int, prospective_units: Int): WeeklyCalendar = {
     val end_date = start_date.plusWeeks(report_date_splits * prospective_units)
     WeeklyCalendar(start_date, end_date, report_date_splits)
   }
@@ -89,5 +72,4 @@ object WeeklyCalendar {
     val end_date = reference_date.plusWeeks(prospective_units * report_date_splits)
     WeeklyCalendar(start_date, end_date, report_date_splits)
   }
-
 }
